@@ -1,0 +1,1952 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Générateur de Devis — ETS NIASS & FRÈRE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#f6fbff;--blue1:#0f4ac8;--blue2:#1a67ff;--muted:#666}
+    *{box-sizing:border-box;font-family:'Inter',system-ui,Segoe UI,Roboto,Arial}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#fff);color:#102a43}
+    .container{max-width:1100px;margin:28px auto;padding:24px}
+    header{position:relative;background:white;padding:22px;border-radius:16px;overflow:visible;box-shadow:0 6px 30px rgba(12,40,120,0.08)}
+    /* curved blues */
+    header::before, header::after{content:"";position:absolute;border-radius:50%;z-index:0}
+    header::before{width:420px;height:300px;background:radial-gradient(circle at 20% 20%,var(--blue1),transparent 40%);left:-120px;top:40px;transform:rotate(-20deg);opacity:0.95}
+    header::after{width:360px;height:220px;background:radial-gradient(circle at 80% 80%,var(--blue2),transparent 40%);right:-80px;bottom:0;transform:rotate(10deg);opacity:0.95}
+    .header-inner{position:relative;z-index:2;display:flex;gap:20px}
+    .logo{margin-left:auto}
+    .logo img{width:120px;height:120px;object-fit:cover;border-radius:0;display:block}
+    .company-info{position:absolute;right:20px;top:20px;text-align:right;max-width:320px}
+    .company-info strong{display:block}
+
+    form{margin-top:8px;display:grid;grid-template-columns:1fr 360px;gap:18px;position:relative;z-index:2}
+    .left{background:#fff;padding:18px;border-radius:12px}
+    .right{background:#fff;padding:18px;border-radius:12px;height:100%}
+
+    label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
+    input[type=text],input[type=number],select,textarea{width:100%;padding:10px;border:1px solid #e5eefc;border-radius:8px;font-size:15px}
+    .radio-group{display:flex;gap:12px;align-items:center}
+    .small{font-size:13px;color:var(--muted)}
+
+    .table-wrap{margin-top:12px;overflow:auto}
+    table{width:100%;border-collapse:collapse;background:#fff}
+    th,td{padding:10px;border-bottom:1px solid #eef4ff;text-align:left}
+    th{background:linear-gradient(90deg,var(--blue1),var(--blue2));color:white;font-weight:600}
+    .actions{display:flex;gap:8px}
+    .btn{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:10px;border:0;cursor:pointer}
+    .btn-primary{background:linear-gradient(90deg,var(--blue1),var(--blue2));color:white}
+    .btn-ghost{background:transparent;border:1px solid #dbeafe;color:var(--blue1)}
+
+    .bottom{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+    .devis-list{margin-top:18px;background:#fff;padding:12px;border-radius:12px}
+    .devis-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid #f1f7ff}
+    .muted{color:var(--muted)}
+
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+
+    /* Numéro de devis stylisé */
+    .devis-number-display {
+      padding: 10px;
+      background: linear-gradient(90deg, var(--blue1), var(--blue2));
+      color: white;
+      border-radius: 8px;
+      font-weight: bold;
+      text-align: center;
+      font-size: 16px;
+      box-shadow: 0 2px 8px rgba(15, 74, 200, 0.3);
+    }
+
+    /* responsive */
+    @media(max-width:980px){form{grid-template-columns:1fr} .company-info{position:static;text-align:left;margin-top:12px}}
+    .devis-date-header {
+    position: absolute;
+    top: 110px;
+    left: 20px;
+    z-index: 3;
+    color: white;
+    font-size: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+    @media (max-width: 640px) {
+    .company-info {
+        max-width: 55%;
+        font-size: 10px;
+    }
+    
+    .company-name {
+        font-size: 14px;
+    }
+    
+    .devis-info {
+        top: 150px;
+        right: 10px;
+        font-size: 10px;
+        padding: 8px;
+    }
+    
+    .devis-number {
+        font-size: 14px;
+    }
+    
+    .client-info {
+        margin-top: 80px;
+        margin-left: 10px;
+        margin-right: 10px;
+        padding: 10px;
+    }
+    
+    .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    .logo-container {
+        width: 80px;
+        height: 80px;
+        top: 15px;
+        right: 15px;
+    }
+    
+    .devis-date-header {
+        top: 100px;
+        font-size: 10px;
+    }
+    
+    /* Ajustements pour les tableaux */
+    .table-container {
+        overflow-x: auto;
+        font-size: 12px;
+    }
+    
+    table {
+        font-size: 12px;
+    }
+    
+    th, td {
+        padding: 4px 8px;
+    }
+    
+    /* Ajustements pour les formulaires */
+    input, select {
+        font-size: 14px; /* Évite le zoom sur iOS */
+    }
+}
+    /* ===== CORRECTION DU DÉFILEMENT HORIZONTAL ===== */
+@media (max-width: 768px) {
+  body, html {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+  }
+  
+  .container {
+    width: 100%;
+    max-width: 100%;
+    padding: 10px;
+    margin: 0;
+    box-sizing: border-box;
+  }
+  
+  header {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .header-inner {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .left, .right {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Correction spécifique pour les éléments qui dépassent */
+  .logo {
+    max-width: 100%;
+  }
+  
+  .logo img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Forcer le tableau à s'adapter */
+  .table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  table {
+    width: 100%;
+    min-width: 100%;
+    table-layout: fixed;
+  }
+  
+  th, td {
+    word-wrap: break-word;
+  }
+  
+  /* Ajustements des inputs */
+  input[type="text"], 
+  input[type="number"], 
+  select, 
+  textarea {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Correction des flexbox qui dépassent */
+  .left > div[style*="display:flex"] {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  
+  .left > div[style*="display:grid"] {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+  
+  /* Elements absolus qui pourraient dépasser */
+  .company-info {
+    position: relative;
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+  }
+  
+  .devis-date-header {
+    position: relative;
+    top: 0;
+    left: 0;
+    margin: 10px 0;
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Correction supplémentaire pour très petits écrans */
+@media (max-width: 480px) {
+  table {
+    font-size: 12px;
+  }
+  
+  th, td {
+    padding: 6px 4px;
+  }
+  
+  .btn {
+    padding: 10px;
+    font-size: 13px;
+  }
+  
+  input[type="text"], 
+  input[type="number"], 
+  select, 
+  textarea {
+    font-size: 14px;
+    padding: 10px;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-inner">
+        <div>
+          <h1 style="margin:0;font-size:20px">DEVIS</h1>
+         </div>
+        <div class="logo" title="Logo">
+          <img src="https://i.postimg.cc/wxRckfnt/3.png" alt="logo">
+        </div>
+      </div>
+    </header>
+
+    <form id="devisForm">
+      <div class="left">
+       <div style="display:flex;gap:12px;align-items:center;justify-content:space-between">
+  <div>
+    <label>Type</label>
+    <div class="radio-group">
+      <label><input type="radio" name="typeClient" value="Client" checked> Client</label>
+      <label><input type="radio" name="typeClient" value="Entreprise"> Entreprise</label>
+    </div>
+  </div>
+  <div style="min-width:200px">
+    <label>Numéro Devis</label>
+    <div class="devis-number-display" id="numDevisDisplay">Chargement...</div>
+  </div>
+  <div style="min-width:200px">
+    <label>Date du devis</label>
+    <input type="date" id="dateDevis">
+  </div>
+</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+          <div>
+            <label>Nom</label>
+            <input type="text" id="nomClient" placeholder=" ">
+          </div>
+          <div>
+            <label>Téléphone</label>
+            <input type="text" id="telClient" placeholder=" ">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+          <div>
+            <label>Marque</label>
+            <input type="text" id="marque" placeholder=" ">
+          </div>
+          <div>
+            <label>Matricule</label>
+            <input type="text" id="matricule" placeholder=" ">
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <label>Description des travaux</label>
+          <textarea id="travailInfo" rows="2" placeholder=" "></textarea>
+        </div>
+
+        <div class="table-wrap">
+          <table id="itemsTable">
+            <thead>
+              <tr><th>Désignation</th><th>Quantité</th><th>Prix unitaire</th><th>Montant</th><th></th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+          <button type="button" class="btn btn-ghost" id="addRow">➕ Ajouter une ligne</button>
+          <div class="muted" style="margin-left:auto"> </div>
+        </div>
+
+        <div style="display:flex;gap:8px;align-items:center;margin-top:12px">
+          <div style="width:160px">
+            <label>TVA (%)</label>
+            <input type="number" id="tva" value="18" min="0">
+          </div>
+          <div style="margin-left:auto;text-align:right">
+            <div class="small">Total HT: <span id="totalHT">0</span> FCFA</div>
+            <div class="small">Montant TVA: <span id="montantTVA">0</span> FCFA</div>
+            <div style="font-weight:700">Total TTC: <span id="totalTTC">0</span> FCFA</div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button type="button" class="btn btn-primary" id="generatePdf">Générer PDF</button>
+          <button type="button" class="btn" id="saveDevis">Sauvegarder</button>
+          <button type="button" class="btn" id="clearForm">Nouveau Devis</button>
+        </div>
+      </div>
+
+      <div class="right">
+        <h3 style="margin-top:0">Liste des devis</h3>
+        <div class="devis-list" id="devisList"></div>
+      </div>
+    </form>
+
+    <footer> ETS NIASS & FRÈRE</footer>
+  </div>
+
+  <!-- Librairies JS pour PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+  <script>
+    // Utils
+    const $ = id => document.getElementById(id);
+    const qs = sel => document.querySelector(sel);
+
+    // Système de numérotation automatique des devis
+// Système de numérotation automatique des devis
+// Système de numérotation automatique des devis
+function generateDevisNumber(shouldIncrement = true) {
+  const currentYear = new Date().getFullYear();
+  const counterKey = `devisCounter_${currentYear}`;
+  
+  let counter = localStorage.getItem(counterKey);
+  
+  if (!counter) {
+    // Premier devis de l'année : COMMENCE À 500
+    counter = 500;
+  } else {
+    // Incrémenter le compteur seulement si shouldIncrement est true
+    counter = parseInt(counter) + (shouldIncrement ? 1 : 0);
+  }
+  
+  // Formater le numéro (ex: DV-2024-500, DV-2024-501, etc.)
+  let formattedNumber = `DV-${currentYear}-${counter}`;
+  
+  // Sauvegarder le nouveau compteur seulement si on a incrémenté
+  if (shouldIncrement) {
+    localStorage.setItem(counterKey, counter);
+  }
+  
+  return formattedNumber;
+}
+
+// Initialiser le numéro de devis (sans incrémenter)
+function initializeDevisNumber() {
+  const devisNumber = generateDevisNumber(false); // false = pas d'incrémentation
+  $('numDevisDisplay').textContent = devisNumber;
+  return devisNumber;
+}
+
+    
+    // Générer et incrémenter le numéro de devis
+function generateAndIncrementDevisNumber() {
+  // D'abord incrémenter et sauvegarder le nouveau numéro
+  const newDevisNumber = generateDevisNumber(true); // true = incrémente
+  
+  // Mettre à jour l'affichage
+  $('numDevisDisplay').textContent = newDevisNumber;
+  
+  return newDevisNumber;
+}
+    // Générer un nouveau numéro sans sauvegarder
+  // Générer un nouveau numéro sans sauvegarder
+function generateNewDevisNumber() {
+  const currentYear = new Date().getFullYear();
+  const counterKey = `devisCounter_${currentYear}`;
+  
+  let counter = localStorage.getItem(counterKey);
+  
+  if (!counter) {
+    counter = 500;
+  } else {
+    counter = parseInt(counter) + 1;
+  }
+  
+  const devisNumber = `DV-${currentYear}-${counter}`;
+  $('numDevisDisplay').textContent = devisNumber;
+  return devisNumber;
+}
+
+    // number to words (français) - simple implementation pour montants entiers
+    function numberToWordsFr(n){
+      const units = ['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize'];
+      const tens = ['', '', 'vingt','trente','quarante','cinquante','soixante','soixante','quatre-vingt','quatre-vingt'];
+      if(n<0) return 'moins '+numberToWordsFr(-n);
+      if(n<=16) return units[n];
+      if(n<20) return 'dix-' + units[n-10];
+      if(n<100){
+        let t = Math.floor(n/10), u = n%10;
+        if(t===7 || t===9){
+          const base = t===7?60:80; const rem = n - base;
+          if(rem<=16) return tens[t] + (rem?'-'+numberToWordsFr(rem):'');
+        }
+        let sep = u ? (u===1 && (t===1||t>1 && t!==8)?'-et-':'-') : '';
+        return tens[t] + (u?sep + numberToWordsFr(u):'');
+      }
+      if(n<1000){
+        let h = Math.floor(n/100), rem = n%100;
+        let prefix = h>1? numberToWordsFr(h) + ' cent' : 'cent';
+        if(h>1 && rem===0) prefix += 's';
+        return prefix + (rem? ' '+numberToWordsFr(rem):'');
+      }
+      if(n<1000000){
+        const k = Math.floor(n/1000), rem = n%1000;
+        const prefix = k>1? numberToWordsFr(k)+' mille' : 'mille';
+        return prefix + (rem? ' '+numberToWordsFr(rem):'');
+      }
+      if(n<1000000000){
+        const m = Math.floor(n/1000000), rem = n%1000000;
+        const prefix = m>1? numberToWordsFr(m)+' million' : 'un million';
+        return prefix + (rem? ' '+numberToWordsFr(rem):'');
+      }
+      return n.toString();
+    }
+
+    // Table management
+    const tbody = document.querySelector('#itemsTable tbody');
+    function addRow(data={designation:'',qty:1,pu:0}){
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input class='inp des' value="${escapeHtml(data.designation)}" placeholder='Désignation'></td>
+        <td><input class='inp qty' type='number' min='0' value='${data.qty}'></td>
+        <td><input class='inp pu' type='number' min='0' value='${data.pu}'></td>
+        <td class='montant'>0</td>
+        <td><button class='btn btn-ghost btn-sm del'>Suppr</button></td>
+      `;
+      tbody.appendChild(tr);
+      hookRow(tr);
+      recalc();
+    }
+
+    function escapeHtml(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    function hookRow(tr){
+      const qty = tr.querySelector('.qty');
+      const pu = tr.querySelector('.pu');
+      const des = tr.querySelector('.des');
+      const del = tr.querySelector('.del');
+      function update(){
+        const q = Number(qty.value)||0; const p = Number(pu.value)||0; tr.querySelector('.montant').textContent = (q*p).toFixed(0);
+        recalc();
+      }
+      qty.addEventListener('input', update);
+      pu.addEventListener('input', update);
+      des.addEventListener('input', ()=>{});
+      del.addEventListener('click', ()=>{ tr.remove(); recalc(); });
+    }
+
+    function recalc(){
+      const rows = [...tbody.querySelectorAll('tr')];
+      let total=0;
+      rows.forEach(r=>{ const q=Number(r.querySelector('.qty').value)||0; const p=Number(r.querySelector('.pu').value)||0; total += q*p; });
+      const tvaPct = Number($('tva').value)||0; const montantTVA = Math.round(total * tvaPct/100);
+      const ttc = Math.round(total + montantTVA);
+      $('totalHT').textContent = total.toFixed(0);
+      $('montantTVA').textContent = montantTVA.toFixed(0);
+      $('totalTTC').textContent = ttc.toFixed(0);
+      return {total, montantTVA, ttc};
+    }
+
+    // Events
+    document.getElementById('addRow').addEventListener('click', ()=>addRow());
+    document.getElementById('tva').addEventListener('input', recalc);
+
+    document.getElementById('clearForm').addEventListener('click', ()=>{
+      if(confirm('Créer un nouveau devis ? Les données non sauvegardées seront perdues.')){ 
+        document.getElementById('devisForm').reset(); 
+        tbody.innerHTML=''; 
+        addRow(); 
+        recalc(); 
+        // Générer un nouveau numéro de devis
+        generateNewDevisNumber();
+        // Réinitialiser la date à aujourd'hui
+        const today = new Date();
+        const formattedDate = today.toISOString().substr(0, 10);
+        $('dateDevis').value = formattedDate;
+      }
+    });
+
+    // PDF generation with jsPDF + autotable
+    async function generatePDF(dataObj){
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({unit:'pt',format:'a4'});
+      const leftMargin = 40; const rightMargin = 40; const pageWidth = doc.internal.pageSize.getWidth();
+
+      // Header: logo at top-right (square)
+      const img = new Image(); img.crossOrigin = 'anonymous'; img.src = 'https://i.postimg.cc/85RsLkrb/LOGO.png';
+      await new Promise(res=>{ img.onload = res; img.onerror = res; });
+      const logoSize = 130; doc.addImage(img, 'JPEG', pageWidth - rightMargin - logoSize, 40, logoSize, logoSize);
+
+      // Company info top-right under logo
+      doc.setFontSize(14); doc.setFont('helvetica','bold'); 
+      doc.text(' ', pageWidth - rightMargin - 10, 140, {align:'right'});
+      doc.setFontSize(10); doc.setFont('helvetica','normal');
+      doc.text('Tel: +221 70 878 19 89 / 77 470 47 42', pageWidth - rightMargin - 10, 154, {align:'right'});
+      doc.text('Email: etsiniasseetfreres@yahoo.com', pageWidth - rightMargin - 10, 168, {align:'right'});
+      doc.text(' ', pageWidth - rightMargin - 10, 182, {align:'right'});
+      
+      // Date en haut à gauche
+      if(dataObj.dateDevis) {
+        const date = new Date(dataObj.dateDevis);
+        const formattedDate = date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        doc.setFontSize(11);
+        doc.setFont('helvetica','normal');
+        doc.text('Date: ' + formattedDate, leftMargin, 70);
+      }
+      
+      // Client info top-left
+      doc.setFontSize(16); doc.setFont('helvetica','bold'); 
+      doc.text('Devis: '+(dataObj.numDevis||''), leftMargin, 90);
+      doc.setFontSize(14); doc.setFont('helvetica','normal');
+      if(dataObj.nom) doc.text('Nom: ' + dataObj.nom, leftMargin, 110);
+      if(dataObj.tel) doc.text('Téléphone: ' + dataObj.tel, leftMargin, 125);
+      if(dataObj.marque) doc.text('Marque: ' + dataObj.marque, leftMargin, 140);
+      if(dataObj.matricule) doc.text('Matricule: ' + dataObj.matricule, leftMargin, 155);
+
+      // Work description
+      if(dataObj.travail) {
+        doc.setDrawColor(220); doc.setLineWidth(0.5);
+        doc.text('Description des travaux:', leftMargin, 180);
+        doc.setFontSize(11);
+        const split = doc.splitTextToSize(dataObj.travail, pageWidth - leftMargin - rightMargin);
+        doc.text(split, leftMargin, 195);
+      }
+
+      // Items table
+      const startY = dataObj.travail ? 205 + split.length*12 : 180;
+      const columns = [
+        {header:'Désignation',dataKey:'des'},
+        {header:'Quantité',dataKey:'qty'},
+        {header:'Prix unitaire',dataKey:'pu'},
+        {header:'Montant',dataKey:'mont'}
+      ];
+      
+      if(dataObj.items && dataObj.items.length > 0) {
+        doc.autoTable({
+          startY, 
+          head:[columns.map(c=>c.header)], 
+          body: dataObj.items.map(it=>[it.des, it.qty, Number(it.pu).toFixed(0) + ' FCFA', Number(it.qty*it.pu||0).toFixed(0) + ' FCFA']),
+          styles:{fontSize:13}, 
+          theme:'striped', 
+          headStyles:{fillColor:[15,74,200]}, 
+          margin:{left:leftMargin,right:rightMargin}
+        });
+      }
+
+      // Totals under table
+      const finalY = dataObj.items && dataObj.items.length > 0 ? doc.lastAutoTable.finalY + 40 : startY + 40;
+      doc.setFontSize(15);
+      doc.text('Total HT : ' + dataObj.totalHT.toFixed(0) + ' FCFA', pageWidth - rightMargin - 10, finalY, {align:'right'});
+      doc.text('TVA ('+dataObj.tva+'%) : ' + dataObj.montantTVA.toFixed(0) + ' FCFA', pageWidth - rightMargin - 10, finalY + 20, {align:'right'});
+      doc.setFont('helvetica','bold'); 
+      doc.text('Total TTC : ' + dataObj.totalTTC.toFixed(0) + ' FCFA', pageWidth - rightMargin - 10, finalY + 43, {align:'right'});
+
+      // Montant en lettre
+      const enLettre = numberToWordsFr(Math.round(dataObj.totalTTC));
+      doc.setFont('helvetica','normal'); doc.setFontSize(10);
+      doc.text('Arrêté le présent devis à la somme de ' + enLettre + ' FRANCS CFA.', leftMargin, finalY + 70);
+
+      // Infos entreprise en bas centré
+      const footerText = "Tel: +221 70 878 19 89/77 470 47 42/Email: etsiniasseetfreres@yahoo.com/CPTE: CORISBANK SN213 01018 005058724101 42/NINEA: 004119964/RCCM: SN THS 2009.A.2320";
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'italic');
+      doc.text(footerText, pageWidth / 2, doc.internal.pageSize.getHeight() - 30, { align: 'center' });
+
+      // Save / open
+      doc.save((dataObj.numDevis||'devis') + '.pdf');
+      
+      // Générer un nouveau numéro après création du PDF
+      generateNewDevisNumber();
+    }
+
+    // Build data and call generate
+document.getElementById('generatePdf').addEventListener('click', async ()=>{
+  // D'abord collecter les données avec l'ancien numéro
+  const data = collectForm();
+  
+  // Générer le PDF
+  await generatePDF(data);
+  
+  // ENSUITE incrémenter pour le prochain devis
+  generateAndIncrementDevisNumber();
+});
+
+    function collectForm(){
+      const type = document.querySelector('input[name="typeClient"]:checked').value;
+      const nom = $('nomClient').value;
+      const tel = $('telClient').value;
+      const marque = $('marque').value;
+      const matricule = $('matricule').value;
+      const numDevis = $('numDevisDisplay').textContent || 'DV-XXXX';
+      const dateDevis = $('dateDevis').value;
+      const travail = $('travailInfo').value;
+      const tva = Number($('tva').value)||0;
+      const items = [...tbody.querySelectorAll('tr')].map(r=>({des:r.querySelector('.des').value, qty:Number(r.querySelector('.qty').value)||0, pu:Number(r.querySelector('.pu').value)||0}));
+      const totals = recalc();
+      return {type,nom,tel,marque,matricule,numDevis,dateDevis,travail,tva,items,totalHT:totals.total,montantTVA:totals.montantTVA,totalTTC:totals.ttc};
+    }
+
+    // Save devis to localStorage list
+    function loadDevisList(){
+      const raw = localStorage.getItem('devis_list');
+      return raw? JSON.parse(raw):[];
+    }
+    function saveDevisList(list){ localStorage.setItem('devis_list', JSON.stringify(list)); renderDevisList(); }
+
+    function renderDevisList(){
+      const container = $('devisList'); container.innerHTML='';
+      const list = loadDevisList();
+      if(!list.length){ container.innerHTML='<div class="muted">Aucun devis enregistré — commencez par remplir le formulaire et cliquez sur « Sauvegarder le devis »</div>'; return; }
+      list.forEach((d,idx)=>{
+        const el = document.createElement('div'); el.className='devis-item';
+        el.innerHTML = `<div><strong>${escapeHtml(d.numDevis)}</strong> — ${escapeHtml(d.nom||'—')} <div class='small muted'>${d.totalTTC.toFixed(0)} FCFA</div></div>
+          <div class='actions'>
+            <button class='btn' data-action='edit' data-idx='${idx}'>✏️</button>
+            <button class='btn' data-action='pdf' data-idx='${idx}'>📄</button>
+            <button class='btn' data-action='delete' data-idx='${idx}'>🗑️</button>
+          </div>`;
+        container.appendChild(el);
+      });
+      container.querySelectorAll('button').forEach(b=>b.addEventListener('click', e=>{
+        const act = b.getAttribute('data-action'); const i = Number(b.getAttribute('data-idx'));
+        const list = loadDevisList();
+        if(act==='delete'){ if(confirm('Supprimer ce devis ?')){ list.splice(i,1); saveDevisList(list); } }
+        if(act==='edit'){ populateForm(list[i]); }
+        if(act==='pdf'){ generatePDF(list[i]); }
+      })); 
+    }
+
+    function populateForm(d){
+      document.querySelector(`input[name="typeClient"][value="${d.type}"]`).checked = true;
+      $('numDevisDisplay').textContent = d.numDevis || '';
+      $('nomClient').value = d.nom || '';
+      $('telClient').value = d.tel || '';
+      $('marque').value = d.marque || '';
+      $('matricule').value = d.matricule || '';
+      $('travailInfo').value = d.travail || '';
+      $('tva').value = d.tva || 0;
+      tbody.innerHTML=''; (d.items||[]).forEach(it=>addRow(it)); recalc();
+    }
+
+    document.getElementById('saveDevis').addEventListener('click', ()=>{
+      const data = collectForm();
+      const list = loadDevisList();
+      // if same num exists replace
+      const exist = list.findIndex(x=>x.numDevis===data.numDevis);
+      if(exist>=0){ if(!confirm('Numéro de devis déjà existant — remplacer ?')) return; list[exist]=data; }
+      else list.unshift(data);
+      saveDevisList(list);
+      alert('Devis sauvegardé ✔️');
+      // Générer un nouveau numéro après sauvegarde
+      generateNewDevisNumber();
+    });
+
+    // Initialiser la date avec la date du jour
+    const today = new Date();
+    const formattedDate = today.toISOString().substr(0, 10);
+    $('dateDevis').value = formattedDate;
+    
+    // init
+    addRow(); 
+    renderDevisList();
+    initializeDevisNumber();
+    
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title> Facture Unique</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px;}
+    h1 { text-align: center; color: #1428A0; }
+    .container { max-width: 900px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);}
+    .form-group { margin-bottom: 12px; }
+    label { display: block; margin-bottom: 4px; font-weight: bold; }
+    input[type=text], input[type=number], input[type="date"] { width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    table, th, td { border: 1px solid #ccc; }
+    th, td { padding: 8px; text-align: center; }
+    th { background: #1428A0; color: #fff; }
+    button { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; background: #1428A0; color: #fff; margin-top: 10px; }
+    button:hover { background: #0f1f80; }
+    .invoice-list { margin-top: 30px; }
+    .invoice-list li { padding: 8px; border-bottom: 1px solid #ccc; cursor: pointer; }
+    .invoice-list li:hover { background: #e6e6ff; }
+    .total-display { font-size: 18px; font-weight: bold; margin-top: 10px; text-align: right; }
+</style>
+</head>
+<body>
+
+<h1> Facture Unique</h1>
+
+<div class="container">
+    <h2>Infos Facture</h2>
+    <div class="form-group">
+        <label>Numéro de Facture :</label>
+        <input type="text" id="invoiceNumber" value="FACT-2024-001">
+    </div>
+    
+    <div class="form-group">
+        <label>Date de Facture :</label>
+        <input type="date" id="invoiceDate">
+    </div>
+    
+    <div class="form-group">
+        <label>Taux TVA (%) :</label>
+        <input type="number" id="tvaRate" value="18" min="0" max="100" step="0.1">
+    </div>
+
+    <h2>Infos Client</h2>
+    <div class="form-group">
+        <label>Nom du client :</label>
+        <input type="text" id="clientName">
+    </div>
+    <div class="form-group">
+        <label>Téléphone :</label>
+        <input type="text" id="clientPhone">
+    </div>
+    <div class="form-group">
+        <label>Adresse :</label>
+        <input type="text" id="clientAddress">
+    </div>
+    <div class="form-group">
+        <label>Email :</label>
+        <input type="text" id="clientEmail">
+    </div>
+
+    <h2>Produits</h2>
+    <table id="productsTable">
+        <thead>
+            <tr>
+                <th>Nom produit</th>
+                <th>Quantité</th>
+                <th>Prix unitaire</th>
+                <th>Total</th>
+                <th>Supprimer</th>
+            </tr>
+        </thead>
+        <tbody id="productsBody">
+            <tr>
+                <td><input type="text" class="productName"></td>
+                <td><input type="number" class="productQty" value="0" min="0"></td>
+                <td><input type="number" class="productPrice" value="0" min="0"></td>
+                <td class="productTotal">0</td>
+                <td><button onclick="removeRow(this)">X</button></td>
+            </tr>
+        </tbody>
+    </table>
+    <button onclick="addRow()">Ajouter un produit</button>
+    
+    <div class="total-display">
+        <div>Sous-total: <span id="subTotal">0</span> FCFA</div>
+        <div id="tvaDisplay">TVA (18%): <span id="tvaAmount">0</span> FCFA</div>
+        <div><strong>Total TTC: <span id="totalTTC">0</span> FCFA</strong></div>
+        <div id="totalInLetters" style="
+        margin-top: 10px;
+        padding: 8px;
+        background: #f8f9fa;
+        border-radius: 5px;
+        font-style: italic;
+        text-align: center;
+        border-left: 4px solid #1428A0;
+    "></div>
+    </div>
+    
+    <button onclick="generateInvoice()">Générer le PDF</button>
+
+    <div class="invoice-list">
+        <h2>Factures enregistrées</h2>
+        <ul id="invoiceList"></ul>
+    </div>
+</div>
+
+<script>
+const { jsPDF } = window.jspdf;
+
+  // Fonction de conversion nombre en lettres
+// Fonction de conversion nombre en lettres (version simplifiée et fiable)
+function numberToLetters(num) {
+    num = Math.round(num);
+    
+    // Tableaux pour la conversion
+    const units = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+    const teens = ['dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf'];
+    const tens = ['', 'dix', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante-dix', 'quatre-vingt', 'quatre-vingt-dix'];
+    
+    if (num === 0) return 'zéro francs CFA';
+    
+    let result = '';
+    
+    // Fonction pour convertir les nombres < 1000
+    function convertLessThanThousand(n) {
+        let str = '';
+        
+        // Centaines
+        if (n >= 100) {
+            const hundreds = Math.floor(n / 100);
+            if (hundreds === 1) {
+                str += 'cent';
+            } else {
+                str += units[hundreds] + ' cent';
+            }
+            n %= 100;
+            if (n > 0) str += ' ';
+        }
+        
+        // 80 cas spécial
+        if (n === 80) {
+            return str + 'quatre-vingts';
+        }
+        
+        // Dizaines et unités
+        if (n >= 20) {
+            const tensDigit = Math.floor(n / 10);
+            const unitsDigit = n % 10;
+            
+            if (tensDigit === 7 || tensDigit === 9) {
+                // Cas spéciaux
+                const base = tensDigit === 7 ? 60 : 80;
+                const remainder = n - base;
+                
+                str += (tensDigit === 7 ? 'soixante' : 'quatre-vingt');
+                
+                if (remainder > 0) {
+                    if (remainder === 1) {
+                        str += '-et-un';
+                    } else if (remainder === 11) {
+                        str += '-onze';
+                    } else if (remainder < 10) {
+                        str += '-' + units[remainder];
+                    } else {
+                        str += '-' + teens[remainder - 10];
+                    }
+                } else if (tensDigit === 8) {
+                    str += 's';
+                }
+            } else {
+                str += tens[tensDigit];
+                if (unitsDigit > 0) {
+                    if (unitsDigit === 1 && tensDigit !== 8) {
+                        str += '-et-un';
+                    } else {
+                        str += '-' + units[unitsDigit];
+                    }
+                } else if (tensDigit === 8) {
+                    str += 's';
+                }
+            }
+        } else if (n >= 10) {
+            str += teens[n - 10];
+        } else if (n > 0) {
+            str += units[n];
+        }
+        
+        return str.trim();
+    }
+    
+    // Convertir par tranches
+    if (num >= 1000000) {
+        const millions = Math.floor(num / 1000000);
+        result += convertLessThanThousand(millions) + (millions > 1 ? ' millions ' : ' million ');
+        num %= 1000000;
+    }
+    
+    if (num >= 1000) {
+        const thousands = Math.floor(num / 1000);
+        if (thousands === 1) {
+            result += 'mille ';
+        } else {
+            result += convertLessThanThousand(thousands) + ' mille ';
+        }
+        num %= 1000;
+    }
+    
+    if (num > 0) {
+        if (result !== '') result += ' ';
+        result += convertLessThanThousand(num);
+    }
+    
+    return result.trim() + ' francs CFA';
+}
+// --- Gestion dynamique des produits ---
+function addRow() {
+    const tbody = document.getElementById('productsBody');
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td><input type="text" class="productName"></td>
+        <td><input type="number" class="productQty" value="0" min="0"></td>
+        <td><input type="number" class="productPrice" value="0" min="0"></td>
+        <td class="productTotal">0</td>
+        <td><button onclick="removeRow(this)">X</button></td>
+    `;
+    tbody.appendChild(row);
+    updateTotals();
+}
+
+function removeRow(btn) {
+    btn.closest('tr').remove();
+    updateTotals();
+}
+
+function updateTotals() {
+    let sousTotal = 0;
+    
+    // Calcul du sous-total
+    document.querySelectorAll('#productsBody tr').forEach(row => {
+        const qty = parseFloat(row.querySelector('.productQty').value) || 0;
+        const price = parseFloat(row.querySelector('.productPrice').value) || 0;
+        const total = qty * price;
+        row.querySelector('.productTotal').textContent = total;
+        sousTotal += total;
+    });
+    
+    // Récupérer le taux TVA personnalisé
+    const tvaRate = parseFloat(document.getElementById('tvaRate').value) || 0;
+    const tva = sousTotal * (tvaRate / 100);
+    const totalTTC = sousTotal + tva;
+    
+    // Mettre à jour l'affichage TVA
+    const tvaDisplay = document.getElementById('tvaDisplay');
+    tvaDisplay.innerHTML = `TVA (${tvaRate}%): <span id="tvaAmount">${formatNumber(tva)}</span> FCFA`;
+    
+    // Affichage
+    document.getElementById('subTotal').textContent = formatNumber(sousTotal);
+    document.getElementById('totalTTC').textContent = formatNumber(totalTTC);
+    
+    // AJOUTEZ CES DEUX LIGNES POUR AFFICHER EN LETTRES
+    const totalInLetters = document.getElementById('totalInLetters');
+    totalInLetters.textContent = `Arrêté à la somme de: ${numberToLetters(Math.round(totalTTC))}`;
+}
+
+// Calcul automatique
+document.addEventListener('input', e => {
+    if(e.target.classList.contains('productQty') || e.target.classList.contains('productPrice')) {
+        updateTotals();
+    }
+});
+
+// Formater les nombres
+function formatNumber(number) {
+    return Math.round(number).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
+// --- Gestion des factures ---
+function generateInvoice() {
+    // Récupérer les nouvelles informations
+    const invoiceNumber = document.getElementById('invoiceNumber').value || "FACT-" + Date.now();
+    const invoiceDate = document.getElementById('invoiceDate').value || new Date().toISOString().split('T')[0];
+    const tvaRate = parseFloat(document.getElementById('tvaRate').value) || 0;
+    
+    const client = {
+        name: document.getElementById('clientName').value || "",
+        phone: document.getElementById('clientPhone').value || "",
+        address: document.getElementById('clientAddress').value || "",
+        email: document.getElementById('clientEmail').value || ""
+    };
+
+    const items = [];
+    document.querySelectorAll('#productsBody tr').forEach(row => {
+        items.push({
+            name: row.querySelector('.productName').value || "",
+            quantity: parseFloat(row.querySelector('.productQty').value) || 0,
+            price: parseFloat(row.querySelector('.productPrice').value) || 0
+        });
+    });
+
+    const sousTotal = items.reduce((sum, i) => sum + i.quantity * i.price, 0);
+    const tva = sousTotal * (tvaRate / 100);
+    const totalTTC = sousTotal + tva;
+    
+    // CRÉER L'OBJET ORDER AVEC TOUTES LES DONNÉES
+    const order = { 
+        customer: client, 
+        items, 
+        sousTotal,    // Calculé ici
+        tva,          // Calculé ici  
+        totalTTC,     // Calculé ici
+        tvaRate,      // Le taux de TVA (peut être 0)
+        invoiceNumber, 
+        date: invoiceDate,
+        generatedDate: new Date().toISOString()
+    };
+
+    // Sauvegarder localement
+    const saved = JSON.parse(localStorage.getItem('invoices') || '[]');
+    saved.push(order);
+    localStorage.setItem('invoices', JSON.stringify(saved));
+    displayInvoices();
+
+    // Générer PDF avec l'objet order COMPLET
+    downloadInvoice(order);
+}
+
+function displayInvoices() {
+    const saved = JSON.parse(localStorage.getItem('invoices') || '[]');
+    const ul = document.getElementById('invoiceList');
+    ul.innerHTML = '';
+    saved.forEach(order => {
+        const li = document.createElement('li');
+        li.textContent = `Facture ${order.invoiceNumber} - ${order.date} - Total: ${formatNumber(order.totalTTC)} FCFA`;
+        li.onclick = () => {
+            showInvoiceDetails(order);
+        };
+        ul.appendChild(li);
+    });
+}
+
+function showInvoiceDetails(order) {
+    let detail = `Facture N°: ${order.invoiceNumber}\nDate: ${order.date}\nClient: ${order.customer.name}\nTéléphone: ${order.customer.phone}\nEmail: ${order.customer.email || ''}\nAdresse: ${order.customer.address}\n\nProduits:\n`;
+    order.items.forEach((i, idx) => {
+        detail += `${idx+1}. ${i.name} | Qté: ${i.quantity} | Prix: ${i.price} FCFA | Total: ${i.price*i.quantity} FCFA\n`;
+    });
+    detail += `\nSous-total: ${formatNumber(order.sousTotal)} FCFA\nTVA (${order.tvaRate}%): ${formatNumber(order.tva)} FCFA\nTotal TTC: ${formatNumber(order.totalTTC)} FCFA`;
+    if(confirm(detail + "\n\nCliquez sur OK pour régénérer le PDF ?")) {
+        downloadInvoice(order);
+    }
+}
+
+// --- Génération PDF ---
+// --- Génération PDF ---
+function downloadInvoice(order) {
+    const pdf = new jsPDF('p','mm','a4');
+    let y = 20;
+
+    try { 
+        pdf.addImage("https://i.postimg.cc/Ss21d9Rp/LOGO.png", "PNG", 19, 4, 40, 40); 
+    } catch(e){ 
+        console.log("Logo non chargé, continuation sans logo");
+    }
+
+    pdf.setFontSize(18); 
+    pdf.setFont(undefined,'bold');
+    pdf.text("ETS NIASS & FRÈRE",110,20,{align:'center'});
+    pdf.setFontSize(12); 
+    pdf.setFont(undefined,'normal');
+    pdf.text("Réparation – Pièces détachées ",110,27,{align:'center'});
+    pdf.text("Vente & Location de véhicules",110,32,{align:'center'});
+
+    pdf.setFontSize(16); 
+    pdf.setFont(undefined,'bold'); 
+    pdf.text("FACTURE",160,20);
+    pdf.setFontSize(10); 
+    pdf.setFont(undefined,'normal');
+    pdf.text(`N°: ${order.invoiceNumber}`,160,27);
+    pdf.text(`Date: ${order.date}`,160,32);
+
+    y = 45; 
+    pdf.line(15,y,195,y); 
+    y += 15;
+
+    // Informations client
+    pdf.setFontSize(12);
+    pdf.setFont(undefined, 'bold');
+    pdf.text("Facturé à:", 20, y);
+    
+    y += 7;
+    pdf.setFont(undefined, 'normal');
+    if(order.customer.name) pdf.text(order.customer.name, 20, y);
+    
+    y += 6;
+    if(order.customer.phone) pdf.text(order.customer.phone, 20, y);
+    
+    y += 6;
+    if(order.customer.email) pdf.text(order.customer.email, 20, y);
+    
+    y += 6;
+    if(order.customer.address) pdf.text(order.customer.address, 20, y);
+    
+    y += 15;
+
+    // Tableau produits
+    pdf.setFillColor(240,240,240);
+    pdf.rect(15,y,180,10,'F');
+    pdf.setFont(undefined,'bold');
+    pdf.text("Description",20,y+7);
+    pdf.text("Prix unitaire",110,y+7,{align:'right'});
+    pdf.text("Quantité",140,y+7,{align:'right'});
+    pdf.text("Total",180,y+7,{align:'right'});
+    y += 10; 
+    pdf.setFont(undefined,'normal');
+
+    order.items.forEach(item => {
+        if(y > 250) {
+            pdf.addPage();
+            y = 20;
+        }
+        const splitName = pdf.splitTextToSize(item.name || "", 70);
+        const rowHeight = Math.max(10, splitName.length * 7);
+        pdf.text(splitName, 20, y+5);
+        pdf.text(`${formatNumber(item.price)} FCFA`, 110, y+5, {align:'right'});
+        pdf.text(`${item.quantity}`, 140, y+5, {align:'right'});
+        pdf.text(`${formatNumber(item.price * item.quantity)} FCFA`, 180, y+5, {align:'right'});
+        y += rowHeight; 
+        pdf.line(15,y,195,y);
+    });
+
+    // Totaux - UTILISER LES VALEURS DÉJÀ CALCULÉES dans l'objet order
+    y += 10; 
+    pdf.setFont(undefined,'bold');
+    pdf.text("Sous-total:",140,y,{align:'right'});
+    pdf.text(`${formatNumber(order.sousTotal)} FCFA`,180,y,{align:'right'});
+    
+    // Afficher TVA SEULEMENT si > 0
+    if (order.tvaRate > 0 && order.tva > 0) {
+        y += 7;
+        pdf.text(`TVA (${order.tvaRate}%):`,140,y,{align:'right'});
+        pdf.text(`${formatNumber(order.tva)} FCFA`,180,y,{align:'right'});
+    }
+    
+  y += 7;
+pdf.text("Total TTC:",140,y,{align:'right'});
+pdf.text(`${formatNumber(order.totalTTC)} FCFA`,180,y,{align:'right'});
+
+// ============ MONTANT EN LETTRES AVEC GESTION MULTILIGNE ============
+y += 10;
+pdf.setFont(undefined, 'italic');
+pdf.setFontSize(9);
+const amountInWords = numberToLetters(Math.round(order.totalTTC));
+
+// Découper le texte pour éviter les débordements
+const amountLines = pdf.splitTextToSize(`Arrêté à la somme de: ${amountInWords}`, 170);
+amountLines.forEach((line, index) => {
+    pdf.text(line, 20, y + (index * 5));
+});
+
+// ============ SIGNATURE À DROITE ============
+// Calculer la position Y après le texte en lettres
+const textHeight = amountLines.length * 5;
+y += textHeight + 15; // Espacement après le texte
+
+try {
+    const signatureUrl = "https://i.postimg.cc/PJhQ4P0f/LOCATION-VENTEDEVEHICULES-PIECESDERECHANGE-REPARATION-2.png";
+    // Position: x=120 (à droite), y=position calculée, largeur=70, hauteur=30
+    pdf.addImage(signatureUrl, "PNG", 120, y, 70, 30);
+    
+    // Texte "Signature" centré sous l'image
+    pdf.setFont(undefined, 'normal');
+    pdf.setFontSize(8);
+    pdf.text("Signature", 155, y + 35, {align: 'center'}); // 155 = centre de l'image
+} catch(e) {
+    console.log("Signature non chargée : " + e.message);
+    // Fallback si l'image ne se charge pas
+    pdf.setFont(undefined, 'normal');
+    pdf.setFontSize(10);
+    pdf.text("Signature", 155, y + 15, {align: 'center'});
+}
+
+    // Footer
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const footerY = pageHeight - 25;
+    pdf.setFontSize(8);
+    pdf.text("Route de Sangalkam près de la station de pesage - Sénégal",
+             pdf.internal.pageSize.getWidth()/2, footerY, {align:'center'});
+    pdf.text("Tel: +221 70 878 19 89 - 77 470 47 42 / Email: etsiniasseetfreres@yahoo.com",
+             pdf.internal.pageSize.getWidth()/2, footerY+7, {align:'center'});
+    pdf.text("CPTE: CORISBANK SN213 01018 005058724101 42 - NINEA: 004119964 - RCCM: SN THS 2009.A.2320",
+             pdf.internal.pageSize.getWidth()/2, footerY+13, {align:'center'});
+
+    pdf.save(`Facture-${order.invoiceNumber}.pdf`);
+}
+
+// Initialiser les valeurs par défaut
+function initializeForm() {
+    // Date du jour par défaut
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0];
+    document.getElementById('invoiceDate').value = formattedDate;
+    
+    // Générer un numéro de facture automatique
+    const saved = JSON.parse(localStorage.getItem('invoices') || '[]');
+    const lastNumber = saved.length;
+    const year = today.getFullYear();
+    document.getElementById('invoiceNumber').value = `FACT-${year}-${(lastNumber + 1).toString().padStart(3, '0')}`;
+    
+    // Écouter les changements de TVA
+    document.getElementById('tvaRate').addEventListener('input', updateTotals);
+    
+    // Écouter les changements de quantité et prix
+    document.addEventListener('input', e => {
+        if(e.target.classList.contains('productQty') || e.target.classList.contains('productPrice')) {
+            updateTotals();
+        }
+    });
+    
+    // Initialiser les totaux
+    updateTotals();
+}
+
+// Démarrer l'application
+document.addEventListener('DOMContentLoaded', function() {
+    // Afficher les factures existantes
+    displayInvoices();
+    
+    // Initialiser le formulaire
+    initializeForm();
+    
+    // Mettre à jour les totaux initialement
+    updateTotals();
+});
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Générateur de Bon de Livraison — ETS NIASS & FRÈRE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#f6fbff;--blue1:#0f4ac8;--blue2:#1a67ff;--muted:#666}
+    *{box-sizing:border-box;font-family:'Inter',system-ui,Segoe UI,Roboto,Arial}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#fff);color:#102a43}
+    .container{max-width:1100px;margin:28px auto;padding:24px}
+    header{position:relative;background:white;padding:22px;border-radius:16px;overflow:visible;box-shadow:0 6px 30px rgba(12,40,120,0.08)}
+    /* curved blues */
+    header::before, header::after{content:"";position:absolute;border-radius:50%;z-index:0}
+    header::before{width:420px;height:300px;background:radial-gradient(circle at 20% 20%,var(--blue1),transparent 40%);left:-120px;top:40px;transform:rotate(-20deg);opacity:0.95}
+    header::after{width:360px;height:220px;background:radial-gradient(circle at 80% 80%,var(--blue2),transparent 40%);right:-80px;bottom:0;transform:rotate(10deg);opacity:0.95}
+    .header-inner{position:relative;z-index:2;display:flex;gap:20px}
+    .logo{margin-left:auto}
+    .logo img{width:120px;height:120px;object-fit:cover;border-radius:0;display:block}
+    .company-info{position:absolute;right:20px;top:20px;text-align:right;max-width:320px}
+    .company-info strong{display:block}
+
+    form{margin-top:8px;display:grid;grid-template-columns:1fr 360px;gap:18px;position:relative;z-index:2}
+    .left{background:#fff;padding:18px;border-radius:12px}
+    .right{background:#fff;padding:18px;border-radius:12px;height:100%}
+
+    label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
+    input[type=text],input[type=number],select,textarea{width:100%;padding:10px;border:1px solid #e5eefc;border-radius:8px;font-size:15px}
+    .radio-group{display:flex;gap:12px;align-items:center}
+    .small{font-size:13px;color:var(--muted)}
+
+    .table-wrap{margin-top:12px;overflow:auto}
+    table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e5eefc}
+    th,td{padding:10px;border-bottom:1px solid #eef4ff;text-align:left}
+    th{background:linear-gradient(90deg,var(--blue1),var(--blue2));color:white;font-weight:600}
+    .actions{display:flex;gap:8px}
+    .btn{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:10px;border:0;cursor:pointer}
+    .btn-primary{background:linear-gradient(90deg,var(--blue1),var(--blue2));color:white}
+    .btn-ghost{background:transparent;border:1px solid #dbeafe;color:var(--blue1)}
+
+    .bottom{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+    .devis-list{margin-top:18px;background:#fff;padding:12px;border-radius:12px}
+    .devis-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid #f1f7ff}
+    .muted{color:var(--muted)}
+
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+
+    /* responsive */
+    @media(max-width:980px){form{grid-template-columns:1fr} .company-info{position:static;text-align:left;margin-top:12px}}
+    .devis-date-header {
+    position: absolute;
+    top: 110px;
+    left: 20px;
+    z-index: 3;
+    color: white;
+    font-size: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+    @media (max-width: 640px) {
+    .company-info {
+        max-width: 55%;
+        font-size: 10px;
+    }
+    
+    .company-name {
+        font-size: 14px;
+    }
+    
+    .devis-info {
+        top: 150px;
+        right: 10px;
+        font-size: 10px;
+        padding: 8px;
+    }
+    
+    .devis-number {
+        font-size: 14px;
+    }
+    
+    .client-info {
+        margin-top: 80px;
+        margin-left: 10px;
+        margin-right: 10px;
+        padding: 10px;
+    }
+    
+    .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    .logo-container {
+        width: 80px;
+        height: 80px;
+        top: 15px;
+        right: 15px;
+    }
+    
+    .devis-date-header {
+        top: 100px;
+        font-size: 10px;
+    }
+    
+    /* Ajustements pour les tableaux */
+    .table-container {
+        overflow-x: auto;
+        font-size: 12px;
+    }
+    
+    table {
+        font-size: 12px;
+    }
+    
+    th, td {
+        padding: 4px 8px;
+    }
+    
+    /* Ajustements pour les formulaires */
+    input, select {
+        font-size: 14px; /* Évite le zoom sur iOS */
+    }
+}
+    /* ===== CORRECTION DU DÉFILEMENT HORIZONTAL ===== */
+@media (max-width: 768px) {
+  body, html {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+  }
+  
+  .container {
+    width: 100%;
+    max-width: 100%;
+    padding: 10px;
+    margin: 0;
+    box-sizing: border-box;
+  }
+  
+  header {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .header-inner {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .left, .right {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Correction spécifique pour les éléments qui dépassent */
+  .logo {
+    max-width: 100%;
+  }
+  
+  .logo img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Forcer le tableau à s'adapter */
+  .table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  table {
+    width: 100%;
+    min-width: 100%;
+    table-layout: fixed;
+  }
+  
+  th, td {
+    word-wrap: break-word;
+  }
+  
+  /* Ajustements des inputs */
+  input[type="text"], 
+  input[type="number"], 
+  select, 
+  textarea {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Correction des flexbox qui dépassent */
+  .left > div[style*="display:flex"] {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  
+  .left > div[style*="display:grid"] {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+  
+  /* Elements absolus qui pourraient dépasser */
+  .company-info {
+    position: relative;
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+  }
+  
+  .devis-date-header {
+    position: relative;
+    top: 0;
+    left: 0;
+    margin: 10px 0;
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Correction supplémentaire pour très petits écrans */
+@media (max-width: 480px) {
+  table {
+    font-size: 12px;
+  }
+  
+  th, td {
+    padding: 6px 4px;
+  }
+  
+  .btn {
+    padding: 10px;
+    font-size: 13px;
+  }
+  
+  input[type="text"], 
+  input[type="number"], 
+  select, 
+  textarea {
+    font-size: 14px;
+    padding: 10px;
+  }
+}
+
+/* Styles pour le tableau simplifié */
+#itemsTable th:nth-child(1),
+#itemsTable td:nth-child(1) {
+  width: 80%;
+}
+
+#itemsTable th:nth-child(2),
+#itemsTable td:nth-child(2) {
+  width: 20%;
+}
+
+/* Style pour le texte service */
+.service-text {
+  margin: 15px 0 10px 0;
+  font-weight: 600;
+}
+
+.service-text.underline {
+  text-decoration: underline;
+}
+
+/* Style pour la signature */
+.signature-section {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid #e5eefc;
+}
+
+.signature-box {
+  text-align: center;
+  width: 45%;
+}
+
+.signature-line {
+  margin-top: 40px;
+  border-top: 1px solid #000;
+  width: 100%;
+}
+
+/* Style pour les informations de contact */
+.contact-info {
+  font-size: 8px;
+  text-align: center;
+  margin-top: 10px;
+  line-height: 1.2;
+}
+
+.contact-info span {
+  display: inline-block;
+  margin: 0 5px;
+}
+
+/* Style pour le tampon */
+.tampon {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.tampon img {
+  max-width: 120px;
+  height: auto;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-inner">
+        <div>
+          <h1 style="margin:0;font-size:20px">BON DE LIVRAISON</h1>
+         </div>
+        <div class="logo" title="Logo">
+          <img src="https://i.postimg.cc/wxRckfnt/3.png" alt="logo">
+        </div>
+      </div>
+
+     
+
+    </header>
+
+    <form id="devisForm">
+      <div class="left">
+       <div style="display:flex;gap:12px;align-items:center;justify-content:space-between">
+  <div style="min-width:200px">
+    <label>Numéro BON DE LIVRAISON</label>
+    <input type="text" id="numDevis" placeholder=" " required>
+  </div>
+  <div style="min-width:200px">
+    <label>Date </label>
+    <input type="date" id="dateDevis">
+  </div>
+</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+          <div>
+            <label>Nom</label>
+            <input type="text" id="nomClient" placeholder=" ">
+          </div>
+          <div>
+            <label>Matricule</label>
+            <input type="text" id="matricule" placeholder=" ">
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <label>Service</label>
+          <input type="text" id="service" placeholder=" ">
+        </div>
+<div style="margin-top:12px">
+  <label> </label>
+  <input type="text" id="nomClient" placeholder="NE RIEN ECRIRE ICI">
+</div>
+        <div class="table-wrap">
+          <table id="itemsTable">
+            <thead>
+              <tr><th>Désignation</th><th>Quantité</th><th></th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+          <button type="button" class="btn btn-ghost" id="addRow">➕ Ajouter une ligne</button>
+          <div class="muted" style="margin-left:auto"> </div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button type="button" class="btn btn-primary" id="generatePdf">Générer</button>
+          <button type="button" class="btn" id="saveDevis"> Sauvegarder</button>
+          <button type="button" class="btn" id="clearForm">Effacer</button>
+        </div>
+      </div>
+
+      <div class="right">
+        <h3 style="margin-top:0">Liste des Bons de Livraison</h3>
+        <div class="devis-list" id="devisList"></div>
+       
+      </div>
+    </form>
+
+    <footer> ETS NIASS & FRÈRE</footer>
+  </div>
+
+  <!-- Librairies JS pour PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+  <script>
+    // Utils
+    const $ = id => document.getElementById(id);
+    const qs = sel => document.querySelector(sel);
+
+    // Table management
+    const tbody = document.querySelector('#itemsTable tbody');
+    function addRow(data={designation:'',qty:1}){
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input class='inp des' value="${escapeHtml(data.designation)}" placeholder='Désignation'></td>
+        <td><input class='inp qty' type='number' min='0' value='${data.qty}'></td>
+        <td><button class='btn btn-ghost btn-sm del'>Suppr</button></td>
+      `;
+      tbody.appendChild(tr);
+      hookRow(tr);
+    }
+
+    function escapeHtml(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    function hookRow(tr){
+      const qty = tr.querySelector('.qty');
+      const des = tr.querySelector('.des');
+      const del = tr.querySelector('.del');
+      function update(){
+        // Pas de calculs nécessaires pour le bon de livraison
+      }
+      qty.addEventListener('input', update);
+      des.addEventListener('input', ()=>{});
+      del.addEventListener('click', ()=>{ tr.remove(); });
+    }
+
+    // Events
+    document.getElementById('addRow').addEventListener('click', ()=>addRow());
+    
+    document.getElementById('clearForm').addEventListener('click', ()=>{
+      if(confirm('Réinitialiser le formulaire ?')){ document.getElementById('devisForm').reset(); tbody.innerHTML=''; addRow(); }
+    });
+
+    // PDF generation with jsPDF + autotable
+    async function generatePDF(dataObj){
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({unit:'pt',format:'a4'});
+      const leftMargin = 40; const rightMargin = 40; const pageWidth = doc.internal.pageSize.getWidth();
+
+      // Header: logo at top-right (square)
+      const img = new Image(); img.crossOrigin = 'anonymous'; img.src = 'https://i.postimg.cc/85RsLkrb/LOGO.png';
+      await new Promise(res=>{ img.onload = res; img.onerror = res; });
+      const logoSize = 130; doc.addImage(img, 'JPEG', pageWidth - rightMargin - logoSize, 40, logoSize, logoSize);
+
+      // Company info top-right under logo
+      doc.setFontSize(14); doc.setFont('helvetica','bold'); doc.text(' ', pageWidth - rightMargin - 10, 140, {align:'right'});
+      doc.setFontSize(10); doc.setFont('helvetica','normal');
+      doc.text('  ', pageWidth - rightMargin - 10, 154, {align:'right'});
+      doc.text('  ', pageWidth - rightMargin - 10, 168, {align:'right'});
+      doc.text(' ', pageWidth - rightMargin - 10, 182, {align:'right'});
+      
+    // Date en haut à gauche
+if(dataObj.dateDevis) {
+  const date = new Date(dataObj.dateDevis);
+  const formattedDate = date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  doc.setFontSize(11);
+  doc.setFont('helvetica','normal');
+  doc.text('Date: ' + formattedDate, leftMargin, 70);
+}
+
+// Titre (descendu pour créer l’espace après la date)
+doc.setFontSize(16);
+doc.setFont('helvetica','bold');
+doc.text('BON DE LIVRAISON ' + (dataObj.numDevis || ''), leftMargin, 105);
+
+// Informations client (espacé calmement)
+doc.setFontSize(14);
+doc.setFont('helvetica','normal');
+doc.text('Nom: ' + (dataObj.nom || ''), leftMargin, 130);
+doc.text('Matricule: ' + (dataObj.matricule || ''), leftMargin, 145);
+
+// Service (descendu pour ajouter un espace visuel)
+if(dataObj.service) {
+  doc.setFont('helvetica','bold');
+  doc.text('Service: ' + dataObj.service, leftMargin, 170);
+  doc.setFont('helvetica','normal');
+}
+
+
+      // Items table
+      const startY = 240;
+      const columns = [
+        {header:'Désignation',dataKey:'des'},
+        {header:'Quantité',dataKey:'qty'}
+      ];
+      doc.autoTable({
+        startY, 
+        head:[columns.map(c=>c.header)], 
+        body: dataObj.items.map(it=>[it.des, it.qty]),
+        styles:{fontSize:13}, 
+        theme:'striped', 
+        headStyles:{fillColor:[15,74,200]}, 
+        margin:{left:leftMargin,right:rightMargin},
+       columnStyles: {
+  0: { cellWidth: 'auto' },
+  1: { cellWidth: 100, halign: 'center' }
+}
+      });
+
+      // Ligne de séparation
+      const finalY = doc.lastAutoTable.finalY + 20;
+      doc.setDrawColor(0);
+      doc.setLineWidth(0.5);
+      doc.line(leftMargin, finalY, pageWidth - rightMargin, finalY);
+
+      // Section de signature
+      const signatureY = finalY + 30;
+      
+      // Client à gauche
+doc.setFontSize(12);
+      
+doc.text(' ', leftMargin, signatureY);
+doc.setFontSize(19);
+doc.text('  ' + (dataObj.nomClient || ''), leftMargin, signatureY + 20); // ← NOM AJOUTÉ ICI
+doc.text('', leftMargin, signatureY + 40);
+      // Garagiste à droite
+      doc.setFontSize(12);
+      doc.text('Le Garagiste', pageWidth - rightMargin - 50, signatureY, {align: 'right'});
+      doc.setFontSize(10);
+      doc.text('', pageWidth - rightMargin - 50, signatureY + 40, {align: 'right'});
+      
+      // Tampon sous le garagiste
+    // Tampon sous le garagiste
+const tamponImg = new Image();
+tamponImg.crossOrigin = 'anonymous';
+tamponImg.src = 'https://i.postimg.cc/PJhQ4P0f/LOCATION-VENTEDEVEHICULES-PIECESDERECHANGE-REPARATION-2.png';
+
+await new Promise(resolve => {
+  tamponImg.onload = resolve;
+  tamponImg.onerror = resolve;
+});
+
+// On choisit juste la largeur qu'on veut (ex: 140)
+const newWidth = 170;
+
+// La hauteur s'ajuste automatiquement selon l'image
+const ratio = tamponImg.height / tamponImg.width;
+const newHeight = newWidth * ratio;
+
+// Ajout dans le PDF (sans déformation)
+doc.addImage(
+  tamponImg,
+  'PNG',
+  pageWidth - rightMargin - newWidth - 10, // Position horizontale
+  signatureY + 40, // Position verticale
+  newWidth,
+  newHeight
+);
+
+
+
+
+      // Infos entreprise en bas centré
+      const footerText = "Tel: +221 70 878 19 89/77 470 47 42/Email: etsiniasseetfreres@yahoo.com/CPTE: CORISBANK SN213 01018 005058724101 42/NINEA: 004119964/RCCM: SN THS 2009.A.2320";
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'italic');
+      
+      // Diviser le texte en deux parties
+      const firstPart = "Tel: +221 70 878 19 89/77 470 47 42/Email: etsiniasseetfreres@yahoo.com";
+      const secondPart = "CPTE: CORISBANK SN213 01018 005058724101 42/NINEA: 004119964/RCCM: SN THS 2009.A.2320";
+      
+      doc.text(firstPart, pageWidth / 2, doc.internal.pageSize.getHeight() - 40, { align: 'center' });
+      doc.text(secondPart, pageWidth / 2, doc.internal.pageSize.getHeight() - 30, { align: 'center' });
+
+      // Save / open
+      doc.save((dataObj.numDevis||'bon-de-livraison') + '.pdf');
+    }
+
+    // Build data and call generate
+    document.getElementById('generatePdf').addEventListener('click', async ()=>{
+      const data = collectForm();
+      await generatePDF(data);
+    });
+ 
+ function collectForm(){
+  const nom = $('nomClient').value;
+  const matricule = $('matricule').value;
+  const numDevis = $('numDevis').value || '';
+  const dateDevis = $('dateDevis').value;
+  const service = $('service').value;
+  const nomClient = $('nomClient').value; // ← AJOUTEZ CETTE LIGNE
+  const items = [...tbody.querySelectorAll('tr')].map(r=>({des:r.querySelector('.des').value, qty:Number(r.querySelector('.qty').value)||0})).filter(i=>i.des||i.qty);
+  return {nom,matricule,numDevis,dateDevis,service,nomClient,items}; // ← AJOUTEZ nomClient ici
+}
+
+    // Save devis to localStorage list
+    function loadDevisList(){
+      const raw = localStorage.getItem('devis_list');
+      return raw? JSON.parse(raw):[];
+    }
+    function saveDevisList(list){ localStorage.setItem('devis_list', JSON.stringify(list)); renderDevisList(); }
+
+    function renderDevisList(){
+      const container = $('devisList'); container.innerHTML='';
+      const list = loadDevisList();
+      if(!list.length){ container.innerHTML='<div class="muted">Aucun bon de livraison enregistré — commencez par remplir le formulaire et cliquez sur « Sauvegarder »</div>'; return; }
+      list.forEach((d,idx)=>{
+        const el = document.createElement('div'); el.className='devis-item';
+        el.innerHTML = `<div><strong>${escapeHtml(d.numDevis)}</strong> — ${escapeHtml(d.nom||'—')}</div>
+          <div class='actions'>
+            <button class='btn' data-action='edit' data-idx='${idx}'>✏️</button>
+            <button class='btn' data-action='pdf' data-idx='${idx}'>📄</button>
+            <button class='btn' data-action='delete' data-idx='${idx}'>🗑️</button>
+          </div>`;
+        container.appendChild(el);
+      });
+      container.querySelectorAll('button').forEach(b=>b.addEventListener('click', e=>{
+        const act = b.getAttribute('data-action'); const i = Number(b.getAttribute('data-idx'));
+        const list = loadDevisList();
+        if(act==='delete'){ if(confirm('Supprimer ce bon de livraison ?')){ list.splice(i,1); saveDevisList(list); } }
+        if(act==='edit'){ populateForm(list[i]); }
+        if(act==='pdf'){ generatePDF(list[i]); }
+      })); 
+    }
+
+    function populateForm(d){
+      $('numDevis').value = d.numDevis || '';
+      $('nomClient').value = d.nom || '';
+      $('matricule').value = d.matricule || '';
+      $('service').value = d.service || '';
+      tbody.innerHTML=''; (d.items||[]).forEach(it=>addRow(it));
+    }
+
+    document.getElementById('saveDevis').addEventListener('click', ()=>{
+      const data = collectForm();
+      const list = loadDevisList();
+      // if same num exists replace
+      const exist = list.findIndex(x=>x.numDevis===data.numDevis);
+      if(exist>=0){ if(!confirm('Numéro de bon de livraison déjà existant — remplacer ?')) return; list[exist]=data; }
+      else list.unshift(data);
+      saveDevisList(list);
+      alert('Bon de livraison sauvegardé ✔️');
+    });
+    
+    // Initialiser la date avec la date du jour
+    const today = new Date();
+    const formattedDate = today.toISOString().substr(0, 10);
+    $('dateDevis').value = formattedDate;
+    
+    // init
+    addRow(); renderDevisList();
+    
+  </script>
+</body>
+</html>
+
