@@ -736,7 +736,6 @@ document.getElementById('generatePdf').addEventListener('click', async ()=>{
 
 
 
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -1093,144 +1092,173 @@ function showInvoiceDetails(order) {
 }
 
 // --- Génération PDF ---
-// --- Génération PDF ---
+// --- GÉNÉRATION PDF V2 – Ultra Chic, Moderne, Clair & Futuriste (fond blanc, tout noir texte principal) ---
 function downloadInvoice(order) {
-    const pdf = new jsPDF('p','mm','a4');
-    let y = 20;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    let y = 12; // Plus d'espace en haut pour élégance
 
-    try { 
-        pdf.addImage("https://i.postimg.cc/Ss21d9Rp/LOGO.png", "PNG", 19, 4, 40, 40); 
-    } catch(e){ 
-        console.log("Logo non chargé, continuation sans logo");
+    // Couleurs ultra propres : presque tout en noir, un seul accent bleu clair moderne
+    const textColor      = [0, 0, 0];       // Noir pur pour tout texte important
+    const accentBlue = [212, 175, 55];    // Bleu électrique clair, discret et futuriste
+    const lightGray      = [220, 220, 220]; // Très léger pour lignes / footer
+
+    pdf.setFont('helvetica', 'normal'); // Base clean
+
+    // === HEADER TRÈS VISIBLE – Logo + Nom entreprise en grand ===
+    try {
+        pdf.addImage("https://i.postimg.cc/Ss21d9Rp/LOGO.png", "PNG", 12, y - 2, 48, 48); // Logo plus grand
+    } catch(e) {
+        console.log("Logo non chargé");
     }
 
-    pdf.setFontSize(18); 
-    pdf.setFont(undefined,'bold');
-    pdf.text("ETS NIASS & FRÈRE",110,20,{align:'center'});
-    pdf.setFontSize(12); 
-    pdf.setFont(undefined,'normal');
-    pdf.text("Réparation – Pièces détachées ",110,27,{align:'center'});
-    pdf.text("Vente & Location de véhicules",110,32,{align:'center'});
+    pdf.setFontSize(22);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(...textColor);
+    pdf.text("ETS NIASS & FRÈRE", 70, y + 18);
 
-    pdf.setFontSize(16); 
-    pdf.setFont(undefined,'bold'); 
-    pdf.text("FACTURE",160,20);
-    pdf.setFontSize(10); 
-    pdf.setFont(undefined,'normal');
-    pdf.text(`N°: ${order.invoiceNumber}`,160,27);
-    pdf.text(`Date: ${order.date}`,160,32);
+    pdf.setFontSize(11);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text("Réparation – Pièces détachées – Vente & Location de véhicules", 70, y + 26);
 
-    y = 45; 
-    pdf.line(15,y,195,y); 
-    y += 15;
+    // FACTURE à droite – Très grand et bold
+    pdf.setFontSize(28);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(...accentBlue);
+    pdf.text("FACTURE", 195, y + 18, { align: 'right' });
 
-    // Informations client
-    pdf.setFontSize(12);
-    pdf.setFont(undefined, 'bold');
-    pdf.text("Facturé à:", 20, y);
-    
-    y += 7;
-    pdf.setFont(undefined, 'normal');
-    if(order.customer.name) pdf.text(order.customer.name, 20, y);
-    
+    pdf.setFontSize(11);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(...textColor);
+    pdf.text(`N° ${order.invoiceNumber}`, 195, y + 26, { align: 'right' });
+    pdf.text(`Date ${order.date}`, 195, y + 32, { align: 'right' });
+
+    y += 48; // Grand espace après header
+
+    // Ligne vague subtile (simulée avec plusieurs petites lignes) – effet futuriste léger
+    pdf.setDrawColor(...accentBlue);
+    pdf.setLineWidth(0.5);
+    pdf.line(12, y, 198, y);
+    pdf.setDrawColor(...lightGray);
+    pdf.line(12, y + 1.2, 198, y + 1.2);
+
+    y += 12;
+
+    // === CLIENT – Style carte minimaliste chic ===
+    pdf.setFontSize(13);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(...textColor);
+    pdf.text("FACTURÉ À", 12, y);
+
+    pdf.setLineWidth(0.4);
+    pdf.setDrawColor(...accentBlue);
+    pdf.line(12, y + 2, 50, y + 2); // Petite underline accentuée
+
+    y += 8;
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(11);
+
+    if (order.customer.name)    pdf.text(order.customer.name.toUpperCase(), 12, y);
     y += 6;
-    if(order.customer.phone) pdf.text(order.customer.phone, 20, y);
-    
+    if (order.customer.phone)   pdf.text(order.customer.phone, 12, y);
     y += 6;
-    if(order.customer.email) pdf.text(order.customer.email, 20, y);
-    
+    if (order.customer.email)   pdf.text(order.customer.email, 12, y);
     y += 6;
-    if(order.customer.address) pdf.text(order.customer.address, 20, y);
-    
-    y += 15;
+    if (order.customer.address) pdf.text(order.customer.address, 12, y);
 
-    // Tableau produits
-    pdf.setFillColor(240,240,240);
-    pdf.rect(15,y,180,10,'F');
-    pdf.setFont(undefined,'bold');
-    pdf.text("Description",20,y+7);
-    pdf.text("Prix unitaire",110,y+7,{align:'right'});
-    pdf.text("Quantité",140,y+7,{align:'right'});
-    pdf.text("Total",180,y+7,{align:'right'});
-    y += 10; 
-    pdf.setFont(undefined,'normal');
+    y += 18;
+
+    // === TABLEAU PRODUITS – Header transparent + bordures fines bleues ===
+    pdf.setFillColor(245, 245, 248); // Très très clair
+    pdf.rect(12, y, 186, 9, 'F');
+
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(...accentBlue);
+    pdf.text("DESCRIPTION", 16, y + 6.5);
+    pdf.text("PRIX UNITAIRE", 98, y + 6.5, { align: 'right' });
+    pdf.text("QTÉ", 138, y + 6.5, { align: 'right' });
+    pdf.text("TOTAL", 188, y + 6.5, { align: 'right' });
+
+    y += 9;
+    pdf.setDrawColor(...lightGray);
+    pdf.setLineWidth(0.3);
+
+    pdf.setTextColor(...textColor);
+    pdf.setFont('helvetica', 'normal');
 
     order.items.forEach(item => {
-        if(y > 250) {
+        if (y > 245) {
             pdf.addPage();
             y = 20;
         }
-        const splitName = pdf.splitTextToSize(item.name || "", 70);
-        const rowHeight = Math.max(10, splitName.length * 7);
-        pdf.text(splitName, 20, y+5);
-        pdf.text(`${formatNumber(item.price)} FCFA`, 110, y+5, {align:'right'});
-        pdf.text(`${item.quantity}`, 140, y+5, {align:'right'});
-        pdf.text(`${formatNumber(item.price * item.quantity)} FCFA`, 180, y+5, {align:'right'});
-        y += rowHeight; 
-        pdf.line(15,y,195,y);
+
+        const descLines = pdf.splitTextToSize(item.name || "", 75);
+        const rowH = Math.max(8, descLines.length * 5.5);
+
+        pdf.text(descLines, 16, y + 5);
+        pdf.text(`${formatNumber(item.price)} FCFA`, 98, y + 5, { align: 'right' });
+        pdf.text(item.quantity.toString(), 138, y + 5, { align: 'right' });
+        pdf.text(`${formatNumber(item.price * item.quantity)} FCFA`, 188, y + 5, { align: 'right' });
+
+        y += rowH;
+        pdf.line(12, y, 198, y); // Ligne fine grise
     });
 
-    // Totaux - UTILISER LES VALEURS DÉJÀ CALCULÉES dans l'objet order
-    y += 10; 
-    pdf.setFont(undefined,'bold');
-    pdf.text("Sous-total:",140,y,{align:'right'});
-    pdf.text(`${formatNumber(order.sousTotal)} FCFA`,180,y,{align:'right'});
-    
-    // Afficher TVA SEULEMENT si > 0
-    if (order.tvaRate > 0 && order.tva > 0) {
-        y += 7;
-        pdf.text(`TVA (${order.tvaRate}%):`,140,y,{align:'right'});
-        pdf.text(`${formatNumber(order.tva)} FCFA`,180,y,{align:'right'});
+    y += 12;
+
+    // === TOTAUX – Encadré léger chic, aligné droite ===
+    pdf.setDrawColor(...accentBlue);
+    pdf.setLineWidth(0.6);
+    pdf.roundedRect(110, y, 88, order.tva > 0 ? 28 : 20, 4, 4, 'D'); // Cadre dashed subtil
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(11);
+    pdf.text("Sous-total", 140, y + 8, { align: 'right' });
+    pdf.text(`${formatNumber(order.sousTotal)} FCFA`, 188, y + 8, { align: 'right' });
+
+    let ty = y + 15;
+    if (order.tva > 0) {
+        pdf.text(`TVA ${order.tvaRate}%`, 140, ty, { align: 'right' });
+        pdf.text(`${formatNumber(order.tva)} FCFA`, 188, ty, { align: 'right' });
+        ty += 7;
     }
-    
-  y += 7;
-pdf.text("Total TTC:",140,y,{align:'right'});
-pdf.text(`${formatNumber(order.totalTTC)} FCFA`,180,y,{align:'right'});
 
-// ============ MONTANT EN LETTRES AVEC GESTION MULTILIGNE ============
-y += 10;
-pdf.setFont(undefined, 'italic');
-pdf.setFontSize(9);
-const amountInWords = numberToLetters(Math.round(order.totalTTC));
+    pdf.setFontSize(12);
+    pdf.text("TOTAL TTC", 140, ty, { align: 'right' });
+    pdf.setTextColor(...accentBlue);
+    pdf.text(`${formatNumber(order.totalTTC)} FCFA`, 188, ty, { align: 'right' });
 
-// Découper le texte pour éviter les débordements
-const amountLines = pdf.splitTextToSize(`Arrêté à la somme de: ${amountInWords}`, 170);
-amountLines.forEach((line, index) => {
-    pdf.text(line, 20, y + (index * 5));
-});
+    y = ty + 18;
 
-// ============ SIGNATURE À DROITE ============
-// Calculer la position Y après le texte en lettres
-const textHeight = amountLines.length * 5;
-y += textHeight + 15; // Espacement après le texte
-
-try {
-    const signatureUrl = "https://i.postimg.cc/PJhQ4P0f/LOCATION-VENTEDEVEHICULES-PIECESDERECHANGE-REPARATION-2.png";
-    // Position: x=120 (à droite), y=position calculée, largeur=70, hauteur=30
-    pdf.addImage(signatureUrl, "PNG", 120, y, 70, 30);
-    
-    // Texte "Signature" centré sous l'image
-    pdf.setFont(undefined, 'normal');
-    pdf.setFontSize(8);
-    pdf.text("Signature", 155, y + 35, {align: 'center'}); // 155 = centre de l'image
-} catch(e) {
-    console.log("Signature non chargée : " + e.message);
-    // Fallback si l'image ne se charge pas
-    pdf.setFont(undefined, 'normal');
+    // === MONTANT EN LETTRES – Italique élégant, grand espace ===
+    pdf.setFont('helvetica', 'italic');
     pdf.setFontSize(10);
-    pdf.text("Signature", 155, y + 15, {align: 'center'});
-}
+    pdf.setTextColor(...textColor);
+    const words = numberToLetters(Math.round(order.totalTTC));
+    const lines = pdf.splitTextToSize(`Arrêté à la somme de : ${words}`, 180);
+    pdf.text(lines, 12, y + 5);
 
-    // Footer
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const footerY = pageHeight - 25;
+    y += lines.length * 6 + 18;
+
+    // === SIGNATURE – Centrée ou droite, avec style premium ===
+    try {
+        const sigUrl = "https://i.postimg.cc/PJhQ4P0f/LOCATION-VENTEDEVEHICULES-PIECESDERECHANGE-REPARATION-2.png";
+        pdf.addImage(sigUrl, "PNG", 130, y, 65, 28);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(9);
+        pdf.text("Signature", 162, y + 34, { align: 'center' });
+    } catch(e) {
+        pdf.setFontSize(11);
+        pdf.text("Signature", 160, y + 10, { align: 'center' });
+    }
+
+    // Footer discret en gris très clair
+    const pageH = pdf.internal.pageSize.getHeight();
     pdf.setFontSize(8);
-    pdf.text("Route de Sangalkam près de la station de pesage - Sénégal",
-             pdf.internal.pageSize.getWidth()/2, footerY, {align:'center'});
-    pdf.text("Tel: +221 70 878 19 89 - 77 470 47 42 / Email: etsiniasseetfreres@yahoo.com",
-             pdf.internal.pageSize.getWidth()/2, footerY+7, {align:'center'});
-    pdf.text("CPTE: CORISBANK SN213 01018 005058724101 42 - NINEA: 004119964 - RCCM: SN THS 2009.A.2320",
-             pdf.internal.pageSize.getWidth()/2, footerY+13, {align:'center'});
+    pdf.setTextColor(0, 0, 0);  // noir pur
+    pdf.text("Route de Sangalkam près de la station de pesage – Sénégal", 105, pageH - 22, { align: 'center' });
+    pdf.text("Tél : +221 70 878 19 89 – 77 470 47 42   |   Email : etsiniasseetfreres@yahoo.com", 105, pageH - 16, { align: 'center' });
+    pdf.text("Compte CORISBANK SN213 01018 005058724101 42 – NINEA 004119964 – RCCM SN THS 2009.A.2320", 105, pageH - 10, { align: 'center' });
 
     pdf.save(`Facture-${order.invoiceNumber}.pdf`);
 }
@@ -1276,8 +1304,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
-
-
 
 
 
