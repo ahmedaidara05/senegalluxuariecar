@@ -8,6 +8,9 @@
   <title>Générateur de Bon de Livraison</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <style>
     :root{--bg:#f6fbff;--blue1:#0f4ac8;--blue2:#1a67ff;--muted:#666}
     *{box-sizing:border-box;font-family:'Inter',system-ui,Segoe UI,Roboto,Arial}
@@ -404,8 +407,62 @@
 
   <script>
     // Utils
+       // Utils
     const $ = id => document.getElementById(id);
     const qs = sel => document.querySelector(sel);
+
+    // ========== FIREBASE INITIALIZATION ==========
+    // Votre configuration Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyAtDX1KtShdZS4BOFE6H8cVmHtvMW8bZUA",
+        authDomain: "senegalluxuarycar.firebaseapp.com",
+        projectId: "senegalluxuarycar",
+        storageBucket: "senegalluxuarycar.firebasestorage.app",
+        messagingSenderId: "41469168124",
+        appId: "1:41469168124:web:e2b709e581dc2b3e598a79",
+        measurementId: "G-KPQGNWN6QD"
+    };
+
+    // Initialiser Firebase
+    try {
+        firebase.initializeApp(firebaseConfig);
+    } catch (error) {
+        console.log("Firebase déjà initialisé ou erreur:", error);
+    }
+
+    // Références Firestore
+    const db = firebase.firestore();
+    const bonsDeLivraisonCollection = db.collection("bonsDeLivraison");
+
+    // ========== FIREBASE AUTH ==========
+    let currentUser = null;
+
+    // Fonction de connexion anonyme (pour garder les données privées)
+    async function signInAnonymously() {
+        try {
+            const userCredential = await firebase.auth().signInAnonymously();
+            currentUser = userCredential.user;
+            console.log("Connecté anonymement:", currentUser.uid);
+            return currentUser;
+        } catch (error) {
+            console.error("Erreur de connexion anonyme:", error);
+            // Fallback sur localStorage
+            return null;
+        }
+    }
+
+    // Vérifier l'état d'authentification au chargement
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            currentUser = user;
+            console.log("Utilisateur connecté:", user.uid);
+            // Charger les données depuis Firebase
+            loadDevisList();
+        } else {
+            // Essayer de se connecter anonymement
+            signInAnonymously();
+        }
+    });
 
     // Table management
     const tbody = document.querySelector('#itemsTable tbody');
@@ -441,6 +498,66 @@
       if(confirm('Réinitialiser le formulaire ?')){ document.getElementById('devisForm').reset(); tbody.innerHTML=''; addRow(); }
     });
 
+    
+    
+        // ========== NUMÉRO AUTOMATIQUE ==========
+    async function getNextDevisNumber() {
+        try {
+            if (!currentUser) {
+                await signInAnonymously();
+            }
+            
+            // Chercher le dernier numéro de l'utilisateur
+            const snapshot = await bonsDeLivraisonCollection
+                .where("userId", "==", currentUser.uid)
+                .orderBy("numDevis", "desc")
+                .limit(1)
+                .get();
+            
+            let lastNumber = 888; // Commence à 888
+            
+            if (!snapshot.empty) {
+                const lastDevis = snapshot.docs[0].data();
+                if (lastDevis.numDevis && lastDevis.numDevis.startsWith("888")) {
+                    // Extraire le nombre après "888"
+                    const match = lastDevis.numDevis.match(/888(\d+)/);
+                    if (match && match[1]) {
+                        lastNumber = 888 + parseInt(match[1]) + 1;
+                    } else {
+                        lastNumber = 888 + 1;
+                    }
+                }
+            }
+            
+            return `888${lastNumber.toString().padStart(4, '0').slice(3)}`;
+            
+        } catch (error) {
+            console.error("Erreur de récupération du numéro:", error);
+            // Fallback : chercher dans le localStorage
+            return getNextDevisNumberFromLocal();
+        }
+    }
+    
+    function getNextDevisNumberFromLocal() {
+        const list = JSON.parse(localStorage.getItem('devis_list') || '[]');
+        const cache = JSON.parse(localStorage.getItem('devis_cache') || '[]');
+        const allItems = [...list, ...cache];
+        
+        // Filtrer les numéros qui commencent par 888
+        const devisNumbers = allItems
+            .filter(item => item.numDevis && item.numDevis.startsWith("888"))
+            .map(item => {
+                const match = item.numDevis.match(/888(\d+)/);
+                return match ? parseInt(match[1]) : 0;
+            })
+            .filter(num => !isNaN(num))
+            .sort((a, b) => b - a);
+        
+        const lastNum = devisNumbers.length > 0 ? devisNumbers[0] : 0;
+        const nextNum = lastNum + 1;
+        
+        return `888${nextNum.toString().padStart(4, '0').slice(3)}`;
+    }
     // PDF generation with jsPDF + autotable
     async function generatePDF(dataObj){
       const { jsPDF } = window.jspdf;
@@ -450,7 +567,7 @@
       // Header: logo at top-right (square)
       const img = new Image(); img.crossOrigin = 'anonymous'; img.src = 'https://i.postimg.cc/gks2dpjN/photo-6046262394910084604-y.jpg';
       await new Promise(res=>{ img.onload = res; img.onerror = res; });
-      const logoSize = 130; doc.addImage(img, 'JPEG', pageWidth - rightMargin - logoSize, 40, logoSize, logoSize);
+      const logoSize = 150; doc.addImage(img, 'JPEG', pageWidth - rightMargin - logoSize, 30, logoSize, logoSize);
 
       // Company info top-right under logo
       doc.setFontSize(14); doc.setFont('helvetica','bold'); doc.text(' ', pageWidth - rightMargin - 10, 140, {align:'right'});
@@ -594,33 +711,179 @@ doc.addImage(
 }
 
     // Save devis to localStorage list
-    function loadDevisList(){
-      const raw = localStorage.getItem('devis_list');
-      return raw? JSON.parse(raw):[];
+       // ========== FIREBASE DATABASE FUNCTIONS ==========
+    
+    // Sauvegarder un bon de livraison
+    async function saveDevisToFirebase(data) {
+        try {
+            if (!currentUser) {
+                await signInAnonymously();
+            }
+            
+            // Ajouter l'ID utilisateur et la date de création
+            const devisData = {
+                ...data,
+                userId: currentUser.uid,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            let docRef;
+            if (data.id) {
+                // Mettre à jour un document existant
+                docRef = await bonsDeLivraisonCollection.doc(data.id).update({
+                    ...devisData,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                return data.id;
+            } else {
+                // Créer un nouveau document
+                docRef = await bonsDeLivraisonCollection.add(devisData);
+                return docRef.id;
+            }
+        } catch (error) {
+            console.error("Erreur de sauvegarde Firebase:", error);
+            // Fallback sur localStorage
+            saveToLocalStorage(data);
+            return null;
+        }
     }
-    function saveDevisList(list){ localStorage.setItem('devis_list', JSON.stringify(list)); renderDevisList(); }
 
-    function renderDevisList(){
-      const container = $('devisList'); container.innerHTML='';
-      const list = loadDevisList();
-      if(!list.length){ container.innerHTML='<div class="muted">Aucun bon de livraison enregistré — commencez par remplir le formulaire et cliquez sur « Sauvegarder »</div>'; return; }
-      list.forEach((d,idx)=>{
-        const el = document.createElement('div'); el.className='devis-item';
-        el.innerHTML = `<div><strong>${escapeHtml(d.numDevis)}</strong> — ${escapeHtml(d.nom||'—')}</div>
-          <div class='actions'>
-            <button class='btn' data-action='edit' data-idx='${idx}'>✏️</button>
-            <button class='btn' data-action='pdf' data-idx='${idx}'>📄</button>
-            <button class='btn' data-action='delete' data-idx='${idx}'>🗑️</button>
-          </div>`;
-        container.appendChild(el);
-      });
-      container.querySelectorAll('button').forEach(b=>b.addEventListener('click', e=>{
-        const act = b.getAttribute('data-action'); const i = Number(b.getAttribute('data-idx'));
-        const list = loadDevisList();
-        if(act==='delete'){ if(confirm('Supprimer ce bon de livraison ?')){ list.splice(i,1); saveDevisList(list); } }
-        if(act==='edit'){ populateForm(list[i]); }
-        if(act==='pdf'){ generatePDF(list[i]); }
-      })); 
+    // Charger la liste des bons de livraison
+    async function loadDevisList() {
+        try {
+            if (!currentUser) {
+                await signInAnonymously();
+            }
+            
+            // Récupérer les documents de l'utilisateur courant, triés par date de création
+            const snapshot = await bonsDeLivraisonCollection
+                .where("userId", "==", currentUser.uid)
+                .orderBy("createdAt", "desc")
+                .get();
+            
+            const list = [];
+            snapshot.forEach(doc => {
+                list.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+            
+            // Sauvegarder en cache local pour l'offline
+            localStorage.setItem('devis_cache', JSON.stringify(list));
+            
+            return list;
+        } catch (error) {
+            console.error("Erreur de chargement Firebase:", error);
+            // Charger depuis le cache local
+            return loadFromLocalStorage();
+        }
+    }
+
+    // Supprimer un bon de livraison
+    async function deleteDevisFromFirebase(id) {
+        try {
+            await bonsDeLivraisonCollection.doc(id).delete();
+            console.log("Document supprimé:", id);
+            return true;
+        } catch (error) {
+            console.error("Erreur de suppression:", error);
+            // Essayer de supprimer du localStorage
+            deleteFromLocalStorage(id);
+            return false;
+        }
+    }
+
+    // ========== FALLBACK LOCALSTORAGE FUNCTIONS ==========
+    function saveToLocalStorage(data) {
+        const list = JSON.parse(localStorage.getItem('devis_list') || '[]');
+        const index = list.findIndex(item => item.numDevis === data.numDevis);
+        
+        if (index >= 0) {
+            list[index] = data;
+        } else {
+            list.unshift(data);
+        }
+        
+        localStorage.setItem('devis_list', JSON.stringify(list));
+    }
+
+    function loadFromLocalStorage() {
+        const cache = localStorage.getItem('devis_cache');
+        if (cache) return JSON.parse(cache);
+        
+        const list = localStorage.getItem('devis_list');
+        return list ? JSON.parse(list) : [];
+    }
+
+    function deleteFromLocalStorage(id) {
+        const list = JSON.parse(localStorage.getItem('devis_list') || '[]');
+        const newList = list.filter(item => item.id !== id && item.numDevis !== id);
+        localStorage.setItem('devis_list', JSON.stringify(newList));
+        
+        // Mettre à jour le cache
+        const cache = JSON.parse(localStorage.getItem('devis_cache') || '[]');
+        const newCache = cache.filter(item => item.id !== id);
+        localStorage.setItem('devis_cache', JSON.stringify(newCache));
+    }
+
+       async function renderDevisList() {
+        const container = $('devisList'); 
+        container.innerHTML = '<div class="muted">Chargement...</div>';
+        
+        try {
+            const list = await loadDevisList();
+            
+            if (!list.length) { 
+                container.innerHTML = '<div class="muted">Aucun bon de livraison enregistré — commencez par remplir le formulaire et cliquez sur « Sauvegarder »</div>'; 
+                return; 
+            }
+            
+            container.innerHTML = '';
+            list.forEach((d, idx) => {
+                const el = document.createElement('div'); 
+                el.className = 'devis-item';
+                el.innerHTML = `
+                    <div>
+                        <strong>${escapeHtml(d.numDevis || 'Sans numéro')}</strong> — ${escapeHtml(d.nom || '—')}
+                        <div style="font-size: 11px; color: #666;">
+                            ${d.dateDevis || ''}
+                        </div>
+                    </div>
+                    <div class='actions'>
+                        <button class='btn' data-action='edit' data-id='${d.id || idx}'>✏️</button>
+                        <button class='btn' data-action='pdf' data-id='${d.id || idx}'>📄</button>
+                        <button class='btn' data-action='delete' data-id='${d.id || idx}'>🗑️</button>
+                    </div>`;
+                container.appendChild(el);
+            });
+            
+            container.querySelectorAll('button').forEach(b => {
+                b.addEventListener('click', async e => {
+                    const act = b.getAttribute('data-action');
+                    const id = b.getAttribute('data-id');
+                    const list = await loadDevisList();
+                    const devis = list.find(item => item.id === id || item.numDevis === id);
+                    
+                    if (act === 'delete') { 
+                        if (confirm('Supprimer ce bon de livraison ?')) { 
+                            await deleteDevisFromFirebase(id);
+                            renderDevisList();
+                        } 
+                    }
+                    if (act === 'edit' && devis) { 
+                        populateForm(devis); 
+                    }
+                    if (act === 'pdf' && devis) { 
+                        generatePDF(devis); 
+                    }
+                });
+            });
+        } catch (error) {
+            console.error("Erreur de rendu:", error);
+            container.innerHTML = '<div class="muted">Erreur de chargement</div>';
+        }
     }
 
     function populateForm(d){
