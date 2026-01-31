@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Générateur de Bon de Livraison — ETS NIASS & FRÈRE</title>
+  <title>Générateur de Bon de Livraison</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
   <style>
@@ -395,7 +395,7 @@
       </div>
     </form>
 
-    <footer> ETS NIASS & FRÈRE</footer>
+    <footer> LUXUARY CAR </footer>
   </div>
 
   <!-- Librairies JS pour PDF -->
@@ -561,13 +561,13 @@ doc.addImage(
 
 
       // Infos entreprise en bas centré
-      const footerText = "Tel: +221 70 878 19 89/77 470 47 42/Email: etsiniasseetfreres@yahoo.com/CPTE: CORISBANK SN213 01018 005058724101 42/NINEA: 004119964/RCCM: SN THS 2009.A.2320";
+      const footerText = "RC-SN-DKR-2024-A-46119 Tél : +221 77 480 09 30 - 78 896 19 48   |   Email : senegalluxuariecars@yahoo.com NINEA:0116573661";
       doc.setFontSize(9);
       doc.setFont('helvetica', 'italic');
       
       // Diviser le texte en deux parties
-      const firstPart = "Tel: +221 70 878 19 89/77 470 47 42/Email: etsiniasseetfreres@yahoo.com";
-      const secondPart = "CPTE: CORISBANK SN213 01018 005058724101 42/NINEA: 004119964/RCCM: SN THS 2009.A.2320";
+      const firstPart = "RC-SN-DKR-2024-A-46119 Tél : +221 77 480 09 30 - 78 896 19 48";
+      const secondPart = "Email : senegalluxuariecars@yahoo.com NINEA:0116573661";
       
       doc.text(firstPart, pageWidth / 2, doc.internal.pageSize.getHeight() - 40, { align: 'center' });
       doc.text(secondPart, pageWidth / 2, doc.internal.pageSize.getHeight() - 30, { align: 'center' });
