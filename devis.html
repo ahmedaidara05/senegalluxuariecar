@@ -1,731 +1,1422 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Générateur de Devis — ETS NIASS & FRÈRE</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#f6fbff;--blue1:#0f4ac8;--blue2:#1a67ff;--muted:#666}
-    *{box-sizing:border-box;font-family:'Inter',system-ui,Segoe UI,Roboto,Arial}
-    body{margin:0;background:linear-gradient(180deg,var(--bg),#fff);color:#102a43}
-    .container{max-width:1100px;margin:28px auto;padding:24px}
-    header{position:relative;background:white;padding:22px;border-radius:16px;overflow:visible;box-shadow:0 6px 30px rgba(12,40,120,0.08)}
-    /* curved blues */
-    header::before, header::after{content:"";position:absolute;border-radius:50%;z-index:0}
-    header::before{width:420px;height:300px;background:radial-gradient(circle at 20% 20%,var(--blue1),transparent 40%);left:-120px;top:40px;transform:rotate(-20deg);opacity:0.95}
-    header::after{width:360px;height:220px;background:radial-gradient(circle at 80% 80%,var(--blue2),transparent 40%);right:-80px;bottom:0;transform:rotate(10deg);opacity:0.95}
-    .header-inner{position:relative;z-index:2;display:flex;gap:20px}
-    .logo{margin-left:auto}
-    .logo img{width:120px;height:120px;object-fit:cover;border-radius:0;display:block}
-    .company-info{position:absolute;right:20px;top:20px;text-align:right;max-width:320px}
-    .company-info strong{display:block}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SENEGALLUXUARYCAR | Gestion des Devis</title>
+    
+    <!-- Import Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
-    form{margin-top:8px;display:grid;grid-template-columns:1fr 360px;gap:18px;position:relative;z-index:2}
-    .left{background:#fff;padding:18px;border-radius:12px}
-    .right{background:#fff;padding:18px;border-radius:12px;height:100%}
+        const firebaseConfig = {
+            apiKey: "AIzaSyAtDX1KtShdZS4BOFE6H8cVmHtvMW8bZUA",
+            authDomain: "senegalluxuarycar.firebaseapp.com",
+            projectId: "senegalluxuarycar",
+            storageBucket: "senegalluxuarycar.firebasestorage.app",
+            messagingSenderId: "41469168124",
+            appId: "1:41469168124:web:e2b709e581dc2b3e598a79",
+            measurementId: "G-KPQGNWN6QD"
+        };
 
-    label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
-    input[type=text],input[type=number],select,textarea{width:100%;padding:10px;border:1px solid #e5eefc;border-radius:8px;font-size:15px}
-    .radio-group{display:flex;gap:12px;align-items:center}
-    .small{font-size:13px;color:var(--muted)}
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        window.firebase = { db, collection, addDoc, getDocs, deleteDoc, doc };
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --light-card: #ffffff;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-dark: #1e293b;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-purple: #8b5cf6;
+            --border-color: #334155;
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.2);
+            --shadow-sm: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
 
-    .table-wrap{margin-top:12px;overflow:auto}
-    table{width:100%;border-collapse:collapse;background:#fff}
-    th,td{padding:10px;border-bottom:1px solid #eef4ff;text-align:left}
-    th{background:linear-gradient(90deg,var(--blue1),var(--blue2));color:white;font-weight:600}
-    .actions{display:flex;gap:8px}
-    .btn{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:10px;border:0;cursor:pointer}
-    .btn-primary{background:linear-gradient(90deg,var(--blue1),var(--blue2));color:white}
-    .btn-ghost{background:transparent;border:1px solid #dbeafe;color:var(--blue1)}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .bottom{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
-    .devis-list{margin-top:18px;background:#fff;padding:12px;border-radius:12px}
-    .devis-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid #f1f7ff}
-    .muted{color:var(--muted)}
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(at 47% 33%, rgba(59, 130, 246, 0.1) 0, transparent 59%),
+                radial-gradient(at 82% 65%, rgba(139, 92, 246, 0.15) 0, transparent 55%);
+        }
 
-    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+        .glass-card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+        }
 
-    /* Numéro de devis stylisé */
-    .devis-number-display {
-      padding: 10px;
-      background: linear-gradient(90deg, var(--blue1), var(--blue2));
-      color: white;
-      border-radius: 8px;
-      font-weight: bold;
-      text-align: center;
-      font-size: 16px;
-      box-shadow: 0 2px 8px rgba(15, 74, 200, 0.3);
-    }
+        /* Header Styling */
+        .main-header {
+            text-align: center;
+            padding: 3rem 1rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
 
-    /* responsive */
-    @media(max-width:980px){form{grid-template-columns:1fr} .company-info{position:static;text-align:left;margin-top:12px}}
-    .devis-date-header {
-    position: absolute;
-    top: 110px;
-    left: 20px;
-    z-index: 3;
-    color: white;
-    font-size: 12px;
-    background: rgba(0, 0, 0, 0.2);
-    padding: 4px 8px;
-    border-radius: 4px;
-}
-    @media (max-width: 640px) {
-    .company-info {
-        max-width: 55%;
-        font-size: 10px;
-    }
-    
-    .company-name {
-        font-size: 14px;
-    }
-    
-    .devis-info {
-        top: 150px;
-        right: 10px;
-        font-size: 10px;
-        padding: 8px;
-    }
-    
-    .devis-number {
-        font-size: 14px;
-    }
-    
-    .client-info {
-        margin-top: 80px;
-        margin-left: 10px;
-        margin-right: 10px;
-        padding: 10px;
-    }
-    
-    .container {
-        padding-left: 10px;
-        padding-right: 10px;
-    }
-    
-    .logo-container {
-        width: 80px;
-        height: 80px;
-        top: 15px;
-        right: 15px;
-    }
-    
-    .devis-date-header {
-        top: 100px;
-        font-size: 10px;
-    }
-    
-    /* Ajustements pour les tableaux */
-    .table-container {
-        overflow-x: auto;
-        font-size: 12px;
-    }
-    
-    table {
-        font-size: 12px;
-    }
-    
-    th, td {
-        padding: 4px 8px;
-    }
-    
-    /* Ajustements pour les formulaires */
-    input, select {
-        font-size: 14px; /* Évite le zoom sur iOS */
-    }
-}
-    /* ===== CORRECTION DU DÉFILEMENT HORIZONTAL ===== */
-@media (max-width: 768px) {
-  body, html {
-    overflow-x: hidden;
-    width: 100%;
-    position: relative;
-  }
-  
-  .container {
-    width: 100%;
-    max-width: 100%;
-    padding: 10px;
-    margin: 0;
-    box-sizing: border-box;
-  }
-  
-  header {
-    width: 100%;
-    box-sizing: border-box;
-  }
-  
-  .header-inner {
-    flex-direction: column;
-    width: 100%;
-  }
-  
-  form {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .left, .right {
-    width: 100%;
-    box-sizing: border-box;
-  }
-  
-  /* Correction spécifique pour les éléments qui dépassent */
-  .logo {
-    max-width: 100%;
-  }
-  
-  .logo img {
-    max-width: 100%;
-    height: auto;
-  }
-  
-  /* Forcer le tableau à s'adapter */
-  .table-wrap {
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  table {
-    width: 100%;
-    min-width: 100%;
-    table-layout: fixed;
-  }
-  
-  th, td {
-    word-wrap: break-word;
-  }
-  
-  /* Ajustements des inputs */
-  input[type="text"], 
-  input[type="number"], 
-  select, 
-  textarea {
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-  
-  /* Correction des flexbox qui dépassent */
-  .left > div[style*="display:flex"] {
-    flex-wrap: wrap;
-    width: 100%;
-  }
-  
-  .left > div[style*="display:grid"] {
-    grid-template-columns: 1fr;
-    width: 100%;
-  }
-  
-  /* Elements absolus qui pourraient dépasser */
-  .company-info {
-    position: relative;
-    width: 100%;
-    text-align: center;
-    margin-top: 10px;
-  }
-  
-  .devis-date-header {
-    position: relative;
-    top: 0;
-    left: 0;
-    margin: 10px 0;
-    width: 100%;
-    text-align: center;
-  }
-}
+        .main-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 300px;
+            background: var(--primary-gradient);
+            opacity: 0.15;
+            transform: skewY(-5deg);
+            transform-origin: top left;
+        }
 
-/* Correction supplémentaire pour très petits écrans */
-@media (max-width: 480px) {
-  table {
-    font-size: 12px;
-  }
-  
-  th, td {
-    padding: 6px 4px;
-  }
-  
-  .btn {
-    padding: 10px;
-    font-size: 13px;
-  }
-  
-  input[type="text"], 
-  input[type="number"], 
-  select, 
-  textarea {
-    font-size: 14px;
-    padding: 10px;
-  }
-}
+        .header-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
 
-  </style>
+        .header-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Panel Styling */
+        .panel {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+        }
+
+        .panel:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .panel-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+
+        /* Form Elements */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Radio Buttons */
+        .radio-group {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        .radio-group input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-blue);
+        }
+
+        /* Table Styling */
+        .devis-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 1.5rem 0;
+            overflow: hidden;
+            border-radius: var(--radius-md);
+        }
+
+        .devis-table th {
+            background: rgba(59, 130, 246, 0.2);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--accent-blue);
+        }
+
+        .devis-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .devis-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .devis-table tr:hover td {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.875rem 1.75rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--secondary-gradient);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Action Bar */
+        .action-bar {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Totals Display */
+        .totals-display {
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .total-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .total-line:last-child {
+            border-bottom: none;
+            font-size: 1.25rem;
+            font-weight: 700;
+            padding-top: 1rem;
+        }
+
+        .amount-in-words {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: var(--radius-sm);
+            border-left: 4px solid var(--accent-green);
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+
+        /* Devis List */
+        .devis-container {
+            grid-column: 1 / -1;
+            margin-top: 2rem;
+        }
+
+        .devis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .devis-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .devis-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-blue);
+            box-shadow: var(--shadow-md);
+        }
+
+        .devis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .devis-number {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .devis-date {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .devis-client {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .devis-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .devis-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* Statistics */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-title {
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        /* Devis Number Display */
+        .devis-number-display {
+            padding: 1rem;
+            background: rgba(59, 130, 246, 0.15);
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--accent-blue);
+            color: var(--text-primary);
+            font-weight: 700;
+            text-align: center;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard {
+                padding: 1rem;
+            }
+            
+            .header-title {
+                font-size: 2.5rem;
+            }
+            
+            .panel {
+                padding: 1.5rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .devis-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-bar {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Loading State */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent-blue);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background: var(--accent-green);
+            color: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast.error {
+            background: var(--secondary-gradient);
+        }
+
+        /* Icons */
+        .icon {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="header-inner">
-        <div>
-          <h1 style="margin:0;font-size:20px">DEVIS</h1>
-         </div>
-        <div class="logo" title="Logo">
-          <img src="https://i.postimg.cc/gks2dpjN/photo-6046262394910084604-y.jpg" alt="logo">
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Confirmer la suppression</h2>
+            <p>Êtes-vous sûr de vouloir supprimer ce devis ? Cette action est irréversible.</p>
+            <div class="action-bar" style="border-top: none; padding-top: 2rem;">
+                <button class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">Supprimer</button>
+            </div>
         </div>
-      </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="main-header">
+        <h1 class="header-title">SENEGALLUXUARYCAR</h1>
+        <p class="header-subtitle">Système de Gestion des Devis - El Hadji Djibril Niass</p>
     </header>
 
-    <form id="devisForm">
-      <div class="left">
-       <div style="display:flex;gap:12px;align-items:center;justify-content:space-between">
-  <div>
-    <label>Type</label>
-    <div class="radio-group">
-      <label><input type="radio" name="typeClient" value="Client" checked> Client</label>
-      <label><input type="radio" name="typeClient" value="Entreprise"> Entreprise</label>
-    </div>
-  </div>
-  <div style="min-width:200px">
-    <label>Numéro Devis</label>
-    <div class="devis-number-display" id="numDevisDisplay">DEV-2000-01</div>
-  </div>
-  <div style="min-width:200px">
-    <label>Date du devis</label>
-    <input type="date" id="dateDevis">
-  </div>
-</div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
-          <div>
-            <label>Nom</label>
-            <input type="text" id="nomClient" placeholder=" ">
-          </div>
-          <div>
-            <label>Téléphone</label>
-            <input type="text" id="telClient" placeholder=" ">
-          </div>
+    <!-- Dashboard -->
+    <main class="dashboard">
+        <!-- Statistics Panel -->
+        <div class="panel fade-in">
+            <h2 class="panel-title">📊 Statistiques</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalDevis">0</div>
+                    <div class="stat-label">Devis totales</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalRevenue">0 FCFA</div>
+                    <div class="stat-label">Chiffre d'affaires</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="averageDevis">0 FCFA</div>
+                    <div class="stat-label">Moyenne par devis</div>
+                </div>
+            </div>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
-          <div>
-            <label>Marque</label>
-            <input type="text" id="marque" placeholder=" ">
-          </div>
-          <div>
-            <label>Matricule</label>
-            <input type="text" id="matricule" placeholder=" ">
-          </div>
+        <!-- Devis Creation Panel -->
+        <div class="panel fade-in" style="animation-delay: 0.1s">
+            <h2 class="panel-title">➕ Nouveau Devis</h2>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Type de Client</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="typeClient" value="Client" checked>
+                            Client
+                        </label>
+                        <label>
+                            <input type="radio" name="typeClient" value="Entreprise">
+                            Entreprise
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Numéro du Devis</label>
+                    <div class="devis-number-display" id="numDevisDisplay">DV-2024-001</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date du Devis</label>
+                    <input type="date" id="dateDevis" class="form-input">
+                </div>
+            </div>
+
+            <h3 style="margin: 2rem 0 1rem; color: var(--text-secondary);">Informations Client</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Nom du client</label>
+                    <input type="text" id="nomClient" class="form-input" placeholder="Nom complet">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Téléphone</label>
+                    <input type="text" id="telClient" class="form-input" placeholder="+221 XX XXX XX XX">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Marque du véhicule</label>
+                    <input type="text" id="marque" class="form-input" placeholder="Marque">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Matricule</label>
+                    <input type="text" id="matricule" class="form-input" placeholder="Matricule">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Description des travaux</label>
+                <textarea id="travailInfo" class="form-input" rows="3" placeholder="Décrivez les travaux à effectuer..."></textarea>
+            </div>
+
+            <h3 style="margin: 2rem 0 1rem; color: var(--text-secondary);">Articles & Services</h3>
+            <table class="devis-table">
+                <thead>
+                    <tr>
+                        <th>Désignation</th>
+                        <th style="width: 100px;">Quantité</th>
+                        <th style="width: 120px;">Prix unitaire</th>
+                        <th style="width: 120px;">Total</th>
+                        <th style="width: 60px;"></th>
+                    </tr>
+                </thead>
+                <tbody id="itemsBody">
+                    <tr>
+                        <td><input type="text" class="form-input designation" placeholder="Description de l'article"></td>
+                        <td><input type="number" class="form-input quantity" value="1" min="1"></td>
+                        <td><input type="number" class="form-input price" value="0" min="0"></td>
+                        <td class="item-total">0</td>
+                        <td><button class="btn btn-danger btn-sm btn-icon" onclick="removeItemRow(this)">×</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <button class="btn btn-secondary" onclick="addItemRow()" style="margin-top: 1rem;">
+                <svg class="icon"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Ajouter un article
+            </button>
+
+            <div class="form-grid" style="margin-top: 2rem;">
+                <div class="form-group">
+                    <label class="form-label">Taux TVA (%)</label>
+                    <input type="number" id="tva" class="form-input" value="18" min="0" max="100" step="0.1">
+                </div>
+            </div>
+
+            <div class="totals-display">
+                <div class="total-line">
+                    <span>Sous-total:</span>
+                    <span id="totalHT">0 FCFA</span>
+                </div>
+                <div class="total-line">
+                    <span id="tvaLabel">TVA (18%):</span>
+                    <span id="montantTVA">0 FCFA</span>
+                </div>
+                <div class="total-line">
+                    <span><strong>Total TTC:</strong></span>
+                    <span id="totalTTC" style="font-size: 1.25rem; color: var(--accent-blue);">0 FCFA</span>
+                </div>
+                <div class="amount-in-words" id="totalInLetters">
+                    Arrêté à la somme de: zéro francs CFA
+                </div>
+            </div>
+
+            <div class="action-bar">
+                <button class="btn btn-primary" onclick="saveDevis()">
+                    <svg class="icon"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Enregistrer
+                </button>
+                <button class="btn btn-secondary" onclick="generateDevisPDF()">
+                    <svg class="icon"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    Générer PDF
+                </button>
+                <button class="btn btn-secondary" onclick="clearDevisForm()">
+                    <svg class="icon"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    Nouveau Devis
+                </button>
+            </div>
         </div>
 
-        <div style="margin-top:12px">
-          <label>Description des travaux</label>
-          <textarea id="travailInfo" rows="2" placeholder=" "></textarea>
+        <!-- Devis List Panel -->
+        <div class="panel devis-container fade-in" style="animation-delay: 0.2s">
+            <h2 class="panel-title">📋 Devis enregistrés</h2>
+            <div id="devisGrid" class="devis-grid">
+                <!-- Les devis seront chargés ici dynamiquement -->
+            </div>
         </div>
+    </main>
 
-        <div class="table-wrap">
-          <table id="itemsTable">
-            <thead>
-              <tr><th>Désignation</th><th>Quantité</th><th>Prix unitaire</th><th>Montant</th><th></th></tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
+    <script>
+        const { jsPDF } = window.jspdf;
+        let devis = [];
+        let devisToDelete = null;
 
-        <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-          <button type="button" class="btn btn-ghost" id="addRow">➕ Ajouter une ligne</button>
-          <div class="muted" style="margin-left:auto"> </div>
-        </div>
-
-        <div style="display:flex;gap:8px;align-items:center;margin-top:12px">
-          <div style="width:160px">
-            <label>TVA (%)</label>
-            <input type="number" id="tva" value="18" min="0">
-          </div>
-          <div style="margin-left:auto;text-align:right">
-            <div class="small">Total HT: <span id="totalHT">0</span> FCFA</div>
-            <div class="small">Montant TVA: <span id="montantTVA">0</span> FCFA</div>
-            <div style="font-weight:700">Total TTC: <span id="totalTTC">0</span> FCFA</div>
-          </div>
-        </div>
-
-        <div style="margin-top:12px;display:flex;gap:8px">
-          <button type="button" class="btn btn-primary" id="generatePdf">Générer PDF</button>
-          <button type="button" class="btn" id="saveDevis">Sauvegarder</button>
-          <button type="button" class="btn" id="clearForm">Nouveau Devis</button>
-        </div>
-      </div>
-
-      <div class="right">
-        <h3 style="margin-top:0">Liste des devis</h3>
-        <div class="devis-list" id="devisList"></div>
-      </div>
-    </form>
-
-    <footer> ETS NIASS & FRÈRE</footer>
-  </div>
-
-  <!-- Librairies JS pour PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-
-  <script>
-    // Utils
-    const $ = id => document.getElementById(id);
-    const qs = sel => document.querySelector(sel);
-
-    // Système de numérotation automatique des devis
-// Système de numérotation automatique des devis
-// Système de numérotation automatique des devis
-function generateDevisNumber(shouldIncrement = true) {
-  const currentYear = new Date().getFullYear();
-  const counterKey = `devisCounter_${currentYear}`;
-  
-  let counter = localStorage.getItem(counterKey);
-  
-  if (!counter) {
-    // Premier devis de l'année : COMMENCE À 500
-    counter = 500;
-  } else {
-    // Incrémenter le compteur seulement si shouldIncrement est true
-    counter = parseInt(counter) + (shouldIncrement ? 1 : 0);
-  }
-  
-  // Formater le numéro (ex: DV-2024-500, DV-2024-501, etc.)
-  let formattedNumber = `DV-${currentYear}-${counter}`;
-  
-  // Sauvegarder le nouveau compteur seulement si on a incrémenté
-  if (shouldIncrement) {
-    localStorage.setItem(counterKey, counter);
-  }
-  
-  return formattedNumber;
-}
-
-// Initialiser le numéro de devis (sans incrémenter)
-function initializeDevisNumber() {
-  const devisNumber = generateDevisNumber(false); // false = pas d'incrémentation
-  $('numDevisDisplay').textContent = devisNumber;
-  return devisNumber;
-}
-
-    
-    // Générer et incrémenter le numéro de devis
-function generateAndIncrementDevisNumber() {
-  // D'abord incrémenter et sauvegarder le nouveau numéro
-  const newDevisNumber = generateDevisNumber(true); // true = incrémente
-  
-  // Mettre à jour l'affichage
-  $('numDevisDisplay').textContent = newDevisNumber;
-  
-  return newDevisNumber;
-}
-    // Générer un nouveau numéro sans sauvegarder
-  // Générer un nouveau numéro sans sauvegarder
-function generateNewDevisNumber() {
-  const currentYear = new Date().getFullYear();
-  const counterKey = `devisCounter_${currentYear}`;
-  
-  let counter = localStorage.getItem(counterKey);
-  
-  if (!counter) {
-    counter = 500;
-  } else {
-    counter = parseInt(counter) + 1;
-  }
-  
-  const devisNumber = `DV-${currentYear}-${counter}`;
-  $('numDevisDisplay').textContent = devisNumber;
-  return devisNumber;
-}
-
-    // number to words (français) - simple implementation pour montants entiers
-    function numberToWordsFr(n){
-      const units = ['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize'];
-      const tens = ['', '', 'vingt','trente','quarante','cinquante','soixante','soixante','quatre-vingt','quatre-vingt'];
-      if(n<0) return 'moins '+numberToWordsFr(-n);
-      if(n<=16) return units[n];
-      if(n<20) return 'dix-' + units[n-10];
-      if(n<100){
-        let t = Math.floor(n/10), u = n%10;
-        if(t===7 || t===9){
-          const base = t===7?60:80; const rem = n - base;
-          if(rem<=16) return tens[t] + (rem?'-'+numberToWordsFr(rem):'');
-        }
-        let sep = u ? (u===1 && (t===1||t>1 && t!==8)?'-et-':'-') : '';
-        return tens[t] + (u?sep + numberToWordsFr(u):'');
-      }
-      if(n<1000){
-        let h = Math.floor(n/100), rem = n%100;
-        let prefix = h>1? numberToWordsFr(h) + ' cent' : 'cent';
-        if(h>1 && rem===0) prefix += 's';
-        return prefix + (rem? ' '+numberToWordsFr(rem):'');
-      }
-      if(n<1000000){
-        const k = Math.floor(n/1000), rem = n%1000;
-        const prefix = k>1? numberToWordsFr(k)+' mille' : 'mille';
-        return prefix + (rem? ' '+numberToWordsFr(rem):'');
-      }
-      if(n<1000000000){
-        const m = Math.floor(n/1000000), rem = n%1000000;
-        const prefix = m>1? numberToWordsFr(m)+' million' : 'un million';
-        return prefix + (rem? ' '+numberToWordsFr(rem):'');
-      }
-      return n.toString();
-    }
-
-    // Table management
-    const tbody = document.querySelector('#itemsTable tbody');
-    function addRow(data={designation:'',qty:1,pu:0}){
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><input class='inp des' value="${escapeHtml(data.designation)}" placeholder='Désignation'></td>
-        <td><input class='inp qty' type='number' min='0' value='${data.qty}'></td>
-        <td><input class='inp pu' type='number' min='0' value='${data.pu}'></td>
-        <td class='montant'>0</td>
-        <td><button class='btn btn-ghost btn-sm del'>Suppr</button></td>
-      `;
-      tbody.appendChild(tr);
-      hookRow(tr);
-      recalc();
-    }
-
-    function escapeHtml(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-    function hookRow(tr){
-      const qty = tr.querySelector('.qty');
-      const pu = tr.querySelector('.pu');
-      const des = tr.querySelector('.des');
-      const del = tr.querySelector('.del');
-      function update(){
-        const q = Number(qty.value)||0; const p = Number(pu.value)||0; tr.querySelector('.montant').textContent = (q*p).toFixed(0);
-        recalc();
-      }
-      qty.addEventListener('input', update);
-      pu.addEventListener('input', update);
-      des.addEventListener('input', ()=>{});
-      del.addEventListener('click', ()=>{ tr.remove(); recalc(); });
-    }
-
-    function recalc(){
-      const rows = [...tbody.querySelectorAll('tr')];
-      let total=0;
-      rows.forEach(r=>{ const q=Number(r.querySelector('.qty').value)||0; const p=Number(r.querySelector('.pu').value)||0; total += q*p; });
-      const tvaPct = Number($('tva').value)||0; const montantTVA = Math.round(total * tvaPct/100);
-      const ttc = Math.round(total + montantTVA);
-      $('totalHT').textContent = total.toFixed(0);
-      $('montantTVA').textContent = montantTVA.toFixed(0);
-      $('totalTTC').textContent = ttc.toFixed(0);
-      return {total, montantTVA, ttc};
-    }
-
-    // Events
-    document.getElementById('addRow').addEventListener('click', ()=>addRow());
-    document.getElementById('tva').addEventListener('input', recalc);
-
-    document.getElementById('clearForm').addEventListener('click', ()=>{
-      if(confirm('Créer un nouveau devis ? Les données non sauvegardées seront perdues.')){ 
-        document.getElementById('devisForm').reset(); 
-        tbody.innerHTML=''; 
-        addRow(); 
-        recalc(); 
-        // Générer un nouveau numéro de devis
-        generateNewDevisNumber();
-        // Réinitialiser la date à aujourd'hui
-        const today = new Date();
-        const formattedDate = today.toISOString().substr(0, 10);
-        $('dateDevis').value = formattedDate;
-      }
-    });
-
-    // PDF generation with jsPDF + autotable
-    async function generatePDF(dataObj){
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({unit:'pt',format:'a4'});
-      const leftMargin = 40; const rightMargin = 40; const pageWidth = doc.internal.pageSize.getWidth();
-
-      // Header: logo at top-right (square)
-      const img = new Image(); img.crossOrigin = 'anonymous'; img.src = 'https://i.postimg.cc/gks2dpjN/photo-6046262394910084604-y.jpg';
-      await new Promise(res=>{ img.onload = res; img.onerror = res; });
-      const logoSize = 130; doc.addImage(img, 'JPEG', pageWidth - rightMargin - logoSize, 40, logoSize, logoSize);
-
-      // Company info top-right under logo
-      doc.setFontSize(14); doc.setFont('helvetica','bold'); 
-      doc.text(' ', pageWidth - rightMargin - 10, 140, {align:'right'});
-      doc.setFontSize(10); doc.setFont('helvetica','normal');
-      doc.text(' ', pageWidth - rightMargin - 10, 154, {align:'right'});
-      doc.text(' ', pageWidth - rightMargin - 10, 168, {align:'right'});
-      doc.text(' ', pageWidth - rightMargin - 10, 182, {align:'right'});
-      
-      // Date en haut à gauche
-      if(dataObj.dateDevis) {
-        const date = new Date(dataObj.dateDevis);
-        const formattedDate = date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        doc.setFontSize(11);
-        doc.setFont('helvetica','normal');
-        doc.text('Date: ' + formattedDate, leftMargin, 70);
-      }
-      
-      // Client info top-left
-      doc.setFontSize(16); doc.setFont('helvetica','bold'); 
-      doc.text('Devis: '+(dataObj.numDevis||''), leftMargin, 90);
-      doc.setFontSize(14); doc.setFont('helvetica','normal');
-      if(dataObj.nom) doc.text('Nom: ' + dataObj.nom, leftMargin, 110);
-      if(dataObj.tel) doc.text('Téléphone: ' + dataObj.tel, leftMargin, 125);
-      if(dataObj.marque) doc.text('Marque: ' + dataObj.marque, leftMargin, 140);
-      if(dataObj.matricule) doc.text('Matricule: ' + dataObj.matricule, leftMargin, 155);
-
-      // Work description
-      if(dataObj.travail) {
-        doc.setDrawColor(220); doc.setLineWidth(0.5);
-        doc.text('Description des travaux:', leftMargin, 180);
-        doc.setFontSize(11);
-        const split = doc.splitTextToSize(dataObj.travail, pageWidth - leftMargin - rightMargin);
-        doc.text(split, leftMargin, 195);
-      }
-
-      // Items table
-      const startY = dataObj.travail ? 205 + split.length*12 : 180;
-      const columns = [
-        {header:'Désignation',dataKey:'des'},
-        {header:'Quantité',dataKey:'qty'},
-        {header:'Prix unitaire',dataKey:'pu'},
-        {header:'Montant',dataKey:'mont'}
-      ];
-      
-      if(dataObj.items && dataObj.items.length > 0) {
-        doc.autoTable({
-          startY, 
-          head:[columns.map(c=>c.header)], 
-          body: dataObj.items.map(it=>[it.des, it.qty, Number(it.pu).toFixed(0) + ' FCFA', Number(it.qty*it.pu||0).toFixed(0) + ' FCFA']),
-          styles:{fontSize:13}, 
-          theme:'striped', 
-          headStyles:{fillColor:[15,74,200]}, 
-          margin:{left:leftMargin,right:rightMargin}
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Set today's date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateDevis').value = today;
+            
+            // Generate devis number
+            initializeDevisNumber();
+            
+            // Add event listeners
+            document.getElementById('tva').addEventListener('input', updateDevisTotals);
+            
+            // Load devis from Firebase
+            await loadDevis();
+            
+            // Initial calculation
+            updateDevisTotals();
         });
-      }
 
-      // Totals under table
-      const finalY = dataObj.items && dataObj.items.length > 0 ? doc.lastAutoTable.finalY + 40 : startY + 40;
-      doc.setFontSize(15);
-      doc.text('Total HT : ' + dataObj.totalHT.toFixed(0) + ' FCFA', pageWidth - rightMargin - 10, finalY, {align:'right'});
-      doc.text('TVA ('+dataObj.tva+'%) : ' + dataObj.montantTVA.toFixed(0) + ' FCFA', pageWidth - rightMargin - 10, finalY + 20, {align:'right'});
-      doc.setFont('helvetica','bold'); 
-      doc.text('Total TTC : ' + dataObj.totalTTC.toFixed(0) + ' FCFA', pageWidth - rightMargin - 10, finalY + 43, {align:'right'});
+        // Firebase Functions
+        async function loadDevis() {
+            try {
+                const querySnapshot = await window.firebase.getDocs(
+                    window.firebase.collection(window.firebase.db, 'devis')
+                );
+                
+                devis = [];
+                querySnapshot.forEach((doc) => {
+                    devis.push({ id: doc.id, ...doc.data() });
+                });
+                
+                displayDevis();
+                updateStatistics();
+            } catch (error) {
+                showToast('Erreur de chargement des devis', 'error');
+                console.error('Error loading devis:', error);
+            }
+        }
 
-      // Montant en lettre
-      const enLettre = numberToWordsFr(Math.round(dataObj.totalTTC));
-      doc.setFont('helvetica','normal'); doc.setFontSize(10);
-      doc.text('Arrêté le présent devis à la somme de ' + enLettre + ' FRANCS CFA.', leftMargin, finalY + 70);
+        async function saveDevis() {
+            const devisData = getDevisData();
+            
+            if (!validateDevis(devisData)) {
+                showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                return;
+            }
+            
+            try {
+                // Save to Firebase
+                const docRef = await window.firebase.addDoc(
+                    window.firebase.collection(window.firebase.db, 'devis'),
+                    {
+                        ...devisData,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    }
+                );
+                
+                showToast('Devis enregistré avec succès !');
+                
+                // Reload devis
+                await loadDevis();
+                
+                // Generate PDF
+                generateAndIncrementDevisNumber();
+                
+            } catch (error) {
+                showToast('Erreur lors de l\'enregistrement', 'error');
+                console.error('Error saving devis:', error);
+            }
+        }
 
-      // Infos entreprise en bas centré
-      const footerText = "RC-SN-DKR-2024-A-46119 Tél : +221 77 480 09 30 - 78 896 19 48 Email : senegalluxuariecars@yahoo.com NINEA:0116573661";
-      doc.setFontSize(7);
-      doc.setFont('helvetica', 'italic');
-      doc.text(footerText, pageWidth / 2, doc.internal.pageSize.getHeight() - 30, { align: 'center' });
+        async function deleteDevis(devisId) {
+            try {
+                await window.firebase.deleteDoc(
+                    window.firebase.doc(window.firebase.db, 'devis', devisId)
+                );
+                
+                showToast('Devis supprimé avec succès');
+                await loadDevis();
+            } catch (error) {
+                showToast('Erreur lors de la suppression', 'error');
+                console.error('Error deleting devis:', error);
+            }
+        }
 
-      // Save / open
-      doc.save((dataObj.numDevis||'devis') + '.pdf');
-      
-      // Générer un nouveau numéro après création du PDF
-      generateNewDevisNumber();
-    }
+        // Devis Functions
+        function getDevisData() {
+            const items = [];
+            document.querySelectorAll('#itemsBody tr').forEach(row => {
+                const designation = row.querySelector('.designation').value;
+                const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
+                const price = parseFloat(row.querySelector('.price').value) || 0;
+                
+                if (designation && quantity > 0 && price > 0) {
+                    items.push({ designation, quantity, price });
+                }
+            });
+            
+            const totalHT = items.reduce((sum, i) => sum + i.quantity * i.price, 0);
+            const tvaRate = parseFloat(document.getElementById('tva').value) || 0;
+            const montantTVA = totalHT * (tvaRate / 100);
+            const totalTTC = totalHT + montantTVA;
+            
+            return {
+                devisNumber: document.getElementById('numDevisDisplay').textContent,
+                dateDevis: document.getElementById('dateDevis').value,
+                typeClient: document.querySelector('input[name="typeClient"]:checked').value,
+                tvaRate,
+                client: {
+                    nom: document.getElementById('nomClient').value,
+                    tel: document.getElementById('telClient').value,
+                    marque: document.getElementById('marque').value,
+                    matricule: document.getElementById('matricule').value
+                },
+                travaux: document.getElementById('travailInfo').value,
+                items,
+                totalHT,
+                montantTVA,
+                totalTTC,
+                totalInWords: numberToLetters(Math.round(totalTTC))
+            };
+        }
 
-    // Build data and call generate
-document.getElementById('generatePdf').addEventListener('click', async ()=>{
-  // D'abord collecter les données avec l'ancien numéro
-  const data = collectForm();
-  
-  // Générer le PDF
-  await generatePDF(data);
-  
-  // ENSUITE incrémenter pour le prochain devis
-  generateAndIncrementDevisNumber();
-});
+        function validateDevis(data) {
+            if (!data.devisNumber || !data.client.nom || data.items.length === 0) {
+                return false;
+            }
+            return data.items.every(item => item.designation && item.quantity > 0 && item.price > 0);
+        }
 
-    function collectForm(){
-      const type = document.querySelector('input[name="typeClient"]:checked').value;
-      const nom = $('nomClient').value;
-      const tel = $('telClient').value;
-      const marque = $('marque').value;
-      const matricule = $('matricule').value;
-      const numDevis = $('numDevisDisplay').textContent || 'DV-XXXX';
-      const dateDevis = $('dateDevis').value;
-      const travail = $('travailInfo').value;
-      const tva = Number($('tva').value)||0;
-      const items = [...tbody.querySelectorAll('tr')].map(r=>({des:r.querySelector('.des').value, qty:Number(r.querySelector('.qty').value)||0, pu:Number(r.querySelector('.pu').value)||0}));
-      const totals = recalc();
-      return {type,nom,tel,marque,matricule,numDevis,dateDevis,travail,tva,items,totalHT:totals.total,montantTVA:totals.montantTVA,totalTTC:totals.ttc};
-    }
+        function initializeDevisNumber() {
+            const devisNumber = generateDevisNumber(false);
+            document.getElementById('numDevisDisplay').textContent = devisNumber;
+            return devisNumber;
+        }
 
-    // Save devis to localStorage list
-    function loadDevisList(){
-      const raw = localStorage.getItem('devis_list');
-      return raw? JSON.parse(raw):[];
-    }
-    function saveDevisList(list){ localStorage.setItem('devis_list', JSON.stringify(list)); renderDevisList(); }
+        function generateDevisNumber(shouldIncrement = true) {
+            const currentYear = new Date().getFullYear();
+            const counterKey = `devisCounter_${currentYear}`;
+            
+            let counter = localStorage.getItem(counterKey);
+            
+            if (!counter) {
+                counter = 500;
+            } else {
+                counter = parseInt(counter) + (shouldIncrement ? 1 : 0);
+            }
+            
+            const formattedNumber = `DV-${currentYear}-${counter}`;
+            
+            if (shouldIncrement) {
+                localStorage.setItem(counterKey, counter);
+            }
+            
+            return formattedNumber;
+        }
 
-    function renderDevisList(){
-      const container = $('devisList'); container.innerHTML='';
-      const list = loadDevisList();
-      if(!list.length){ container.innerHTML='<div class="muted">Aucun devis enregistré — commencez par remplir le formulaire et cliquez sur « Sauvegarder le devis »</div>'; return; }
-      list.forEach((d,idx)=>{
-        const el = document.createElement('div'); el.className='devis-item';
-        el.innerHTML = `<div><strong>${escapeHtml(d.numDevis)}</strong> — ${escapeHtml(d.nom||'—')} <div class='small muted'>${d.totalTTC.toFixed(0)} FCFA</div></div>
-          <div class='actions'>
-            <button class='btn' data-action='edit' data-idx='${idx}'>✏️</button>
-            <button class='btn' data-action='pdf' data-idx='${idx}'>📄</button>
-            <button class='btn' data-action='delete' data-idx='${idx}'>🗑️</button>
-          </div>`;
-        container.appendChild(el);
-      });
-      container.querySelectorAll('button').forEach(b=>b.addEventListener('click', e=>{
-        const act = b.getAttribute('data-action'); const i = Number(b.getAttribute('data-idx'));
-        const list = loadDevisList();
-        if(act==='delete'){ if(confirm('Supprimer ce devis ?')){ list.splice(i,1); saveDevisList(list); } }
-        if(act==='edit'){ populateForm(list[i]); }
-        if(act==='pdf'){ generatePDF(list[i]); }
-      })); 
-    }
+        function generateAndIncrementDevisNumber() {
+            const newDevisNumber = generateDevisNumber(true);
+            document.getElementById('numDevisDisplay').textContent = newDevisNumber;
+            return newDevisNumber;
+        }
 
-    function populateForm(d){
-      document.querySelector(`input[name="typeClient"][value="${d.type}"]`).checked = true;
-      $('numDevisDisplay').textContent = d.numDevis || '';
-      $('nomClient').value = d.nom || '';
-      $('telClient').value = d.tel || '';
-      $('marque').value = d.marque || '';
-      $('matricule').value = d.matricule || '';
-      $('travailInfo').value = d.travail || '';
-      $('tva').value = d.tva || 0;
-      tbody.innerHTML=''; (d.items||[]).forEach(it=>addRow(it)); recalc();
-    }
+        // Item Table Functions
+        function addItemRow() {
+            const tbody = document.getElementById('itemsBody');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="text" class="form-input designation" placeholder="Description de l'article"></td>
+                <td><input type="number" class="form-input quantity" value="1" min="1"></td>
+                <td><input type="number" class="form-input price" value="0" min="0"></td>
+                <td class="item-total">0</td>
+                <td><button class="btn btn-danger btn-sm btn-icon" onclick="removeItemRow(this)">×</button></td>
+            `;
+            tbody.appendChild(row);
+            updateDevisTotals();
+        }
 
-    document.getElementById('saveDevis').addEventListener('click', ()=>{
-      const data = collectForm();
-      const list = loadDevisList();
-      // if same num exists replace
-      const exist = list.findIndex(x=>x.numDevis===data.numDevis);
-      if(exist>=0){ if(!confirm('Numéro de devis déjà existant — remplacer ?')) return; list[exist]=data; }
-      else list.unshift(data);
-      saveDevisList(list);
-      alert('Devis sauvegardé ✔️');
-      // Générer un nouveau numéro après sauvegarde
-      generateNewDevisNumber();
-    });
+        function removeItemRow(button) {
+            const row = button.closest('tr');
+            if (document.querySelectorAll('#itemsBody tr').length > 1) {
+                row.remove();
+                updateDevisTotals();
+            }
+        }
 
-    // Initialiser la date avec la date du jour
-    const today = new Date();
-    const formattedDate = today.toISOString().substr(0, 10);
-    $('dateDevis').value = formattedDate;
-    
-    // init
-    addRow(); 
-    renderDevisList();
-    initializeDevisNumber();
-    
-  </script>
+        function updateDevisTotals() {
+            let totalHT = 0;
+            
+            document.querySelectorAll('#itemsBody tr').forEach(row => {
+                const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
+                const price = parseFloat(row.querySelector('.price').value) || 0;
+                const total = quantity * price;
+                row.querySelector('.item-total').textContent = formatNumber(total) + ' FCFA';
+                totalHT += total;
+            });
+            
+            const tvaRate = parseFloat(document.getElementById('tva').value) || 0;
+            const montantTVA = totalHT * (tvaRate / 100);
+            const totalTTC = totalHT + montantTVA;
+            
+            document.getElementById('totalHT').textContent = formatNumber(totalHT) + ' FCFA';
+            document.getElementById('tvaLabel').textContent = `TVA (${tvaRate}%):`;
+            document.getElementById('montantTVA').textContent = formatNumber(montantTVA) + ' FCFA';
+            document.getElementById('totalTTC').textContent = formatNumber(totalTTC) + ' FCFA';
+            
+            document.getElementById('totalInLetters').textContent = 
+                `Arrêté à la somme de: ${numberToLetters(Math.round(totalTTC))}`;
+        }
+
+        // Display Functions
+        function displayDevis() {
+            const container = document.getElementById('devisGrid');
+            container.innerHTML = '';
+            
+            devis.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            devis.forEach(devi => {
+                const card = document.createElement('div');
+                card.className = 'devis-card fade-in';
+                card.innerHTML = `
+                    <div class="devis-header">
+                        <div>
+                            <div class="devis-number">${devi.devisNumber}</div>
+                            <div class="devis-date">${formatDate(devi.dateDevis)}</div>
+                        </div>
+                        <div class="devis-amount">${formatNumber(devi.totalTTC)} FCFA</div>
+                    </div>
+                    <div class="devis-client">
+                        <div style="font-weight: 600;">${devi.client.nom}</div>
+                        <div style="color: var(--text-secondary); font-size: 0.875rem;">${devi.client.tel}</div>
+                        <div style="color: var(--text-secondary); font-size: 0.875rem;">${devi.client.marque} - ${devi.client.matricule}</div>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
+                        ${devi.items.length} article(s) | TVA ${devi.tvaRate}%
+                    </div>
+                    <div class="devis-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="viewDevis('${devi.id}')">
+                            <svg class="icon" style="width: 16px; height: 16px;"><polyline points="1 9 7 14 15 4"/></svg>
+                            Voir
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="downloadDevisPDF(${JSON.stringify(devi).replace(/"/g, '&quot;')})">
+                            <svg class="icon" style="width: 16px; height: 16px;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                            PDF
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="openDeleteModal('${devi.id}')">
+                            <svg class="icon" style="width: 16px; height: 16px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateStatistics() {
+            const totalDevis = devis.length;
+            const totalRevenue = devis.reduce((sum, dev) => sum + dev.totalTTC, 0);
+            const averageDevis = totalDevis > 0 ? totalRevenue / totalDevis : 0;
+            
+            document.getElementById('totalDevis').textContent = totalDevis;
+            document.getElementById('totalRevenue').textContent = formatNumber(totalRevenue) + ' FCFA';
+            document.getElementById('averageDevis').textContent = formatNumber(averageDevis) + ' FCFA';
+        }
+
+        // Utility Functions
+        function formatNumber(num) {
+            return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function clearDevisForm() {
+            if (confirm('Voulez-vous créer un nouveau devis ? Les données non sauvegardées seront perdues.')) {
+                document.getElementById('nomClient').value = '';
+                document.getElementById('telClient').value = '';
+                document.getElementById('marque').value = '';
+                document.getElementById('matricule').value = '';
+                document.getElementById('travailInfo').value = '';
+                
+                const tbody = document.getElementById('itemsBody');
+                tbody.innerHTML = `
+                    <tr>
+                        <td><input type="text" class="form-input designation" placeholder="Description de l'article"></td>
+                        <td><input type="number" class="form-input quantity" value="1" min="1"></td>
+                        <td><input type="number" class="form-input price" value="0" min="0"></td>
+                        <td class="item-total">0</td>
+                        <td><button class="btn btn-danger btn-sm btn-icon" onclick="removeItemRow(this)">×</button></td>
+                    </tr>
+                `;
+                
+                generateAndIncrementDevisNumber();
+                updateDevisTotals();
+                showToast('Formulaire effacé');
+            }
+        }
+
+        function openDeleteModal(devisId) {
+            devisToDelete = devisId;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+            devisToDelete = null;
+        }
+
+        function confirmDelete() {
+            if (devisToDelete) {
+                deleteDevis(devisToDelete);
+                closeModal();
+            }
+        }
+
+        function viewDevis(devisId) {
+            const devi = devis.find(d => d.id === devisId);
+            if (devi) {
+                let details = `Devis N°: ${devi.devisNumber}\n`;
+                details += `Date: ${devi.dateDevis}\n`;
+                details += `Type: ${devi.typeClient}\n`;
+                details += `Client: ${devi.client.nom}\n`;
+                details += `Téléphone: ${devi.client.tel}\n`;
+                details += `Marque: ${devi.client.marque || 'Non renseigné'}\n`;
+                details += `Matricule: ${devi.client.matricule || 'Non renseigné'}\n\n`;
+                details += `Travaux: ${devi.travaux || 'Non renseigné'}\n\n`;
+                details += `Articles (${devi.items.length}):\n`;
+                
+                devi.items.forEach((item, index) => {
+                    details += `${index + 1}. ${item.designation} - ${item.quantity} x ${formatNumber(item.price)} = ${formatNumber(item.quantity * item.price)} FCFA\n`;
+                });
+                
+                details += `\nSous-total: ${formatNumber(devi.totalHT)} FCFA\n`;
+                details += `TVA (${devi.tvaRate}%): ${formatNumber(devi.montantTVA)} FCFA\n`;
+                details += `Total TTC: ${formatNumber(devi.totalTTC)} FCFA\n\n`;
+                details += `Montant en lettres: ${devi.totalInWords}`;
+                
+                alert(details);
+            }
+        }
+
+        function generateDevisPDF() {
+            const devisData = getDevisData();
+            if (validateDevis(devisData)) {
+                downloadDevisPDF(devisData);
+            } else {
+                showToast('Veuillez compléter le devis avant de générer le PDF', 'error');
+            }
+        }
+
+        // PDF Generation Function (même style que vos factures)
+        function downloadDevisPDF(devi) {
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            let y = 12;
+
+            const textColor = [0, 0, 0];
+            const accentBlue = [212, 175, 55];
+            const lightGray = [220, 220, 220];
+
+            pdf.setFont('helvetica', 'normal');
+
+            // Header
+            try {
+                pdf.addImage("https://i.postimg.cc/gks2dpjN/photo-6046262394910084604-y.jpg", "PNG", 12, y - 2, 59, 48);
+            } catch(e) {
+                console.log("Logo non chargé");
+            }
+
+            pdf.setFontSize(22);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(...textColor);
+            pdf.text(" ", 70, y + 18);
+
+            pdf.setFontSize(11);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(" ", 70, y + 26);
+
+            pdf.setFontSize(28);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(...accentBlue);
+            pdf.text("DEVIS", 195, y + 18, { align: 'right' });
+
+            pdf.setFontSize(11);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(...textColor);
+            pdf.text(`N° ${devi.devisNumber}`, 195, y + 26, { align: 'right' });
+            pdf.text(`Date ${devi.dateDevis}`, 195, y + 32, { align: 'right' });
+
+            y += 48;
+
+            pdf.setDrawColor(...accentBlue);
+            pdf.setLineWidth(0.5);
+            pdf.line(12, y, 198, y);
+            pdf.setDrawColor(...lightGray);
+            pdf.line(12, y + 1.2, 198, y + 1.2);
+
+            y += 12;
+
+            // Client Section
+            pdf.setFontSize(13);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(...textColor);
+            pdf.text("CLIENT", 12, y);
+            pdf.setLineWidth(0.4);
+            pdf.setDrawColor(...accentBlue);
+            pdf.line(12, y + 2, 50, y + 2);
+
+            y += 8;
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(11);
+
+            if (devi.client.nom) pdf.text(devi.client.nom.toUpperCase(), 12, y);
+            y += 6;
+            if (devi.client.tel) pdf.text(devi.client.tel, 12, y);
+            y += 6;
+            if (devi.client.marque) pdf.text("Marque: " + devi.client.marque, 12, y);
+            y += 6;
+            if (devi.client.matricule) pdf.text("Matricule: " + devi.client.matricule, 12, y);
+
+            y += 12;
+
+            // Travaux Description
+            if (devi.travaux) {
+                pdf.setFontSize(13);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text("DESCRIPTION DES TRAVAUX", 12, y);
+                pdf.setDrawColor(...accentBlue);
+                pdf.line(12, y + 2, 70, y + 2);
+                
+                y += 8;
+                pdf.setFont('helvetica', 'normal');
+                pdf.setFontSize(11);
+                const travailLines = pdf.splitTextToSize(devi.travaux, 180);
+                pdf.text(travailLines, 12, y);
+                y += travailLines.length * 6 + 12;
+            }
+
+            // Products Table
+            pdf.setFillColor(245, 245, 248);
+            pdf.rect(12, y, 186, 9, 'F');
+
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(...accentBlue);
+            pdf.text("DESIGNATION", 16, y + 6.5);
+            pdf.text("PRIX UNITAIRE", 98, y + 6.5, { align: 'right' });
+            pdf.text("QUANTITÉ", 138, y + 6.5, { align: 'right' });
+            pdf.text("TOTAL", 188, y + 6.5, { align: 'right' });
+
+            y += 9;
+            pdf.setDrawColor(...lightGray);
+            pdf.setLineWidth(0.3);
+            pdf.setTextColor(...textColor);
+            pdf.setFont('helvetica', 'normal');
+
+            devi.items.forEach(item => {
+                if (y > 245) {
+                    pdf.addPage();
+                    y = 20;
+                }
+
+                const descLines = pdf.splitTextToSize(item.designation || "", 75);
+                const rowH = Math.max(8, descLines.length * 5.5);
+
+                pdf.text(descLines, 16, y + 5);
+                pdf.text(`${formatNumber(item.price)} FCFA`, 98, y + 5, { align: 'right' });
+                pdf.text(item.quantity.toString(), 138, y + 5, { align: 'right' });
+                pdf.text(`${formatNumber(item.price * item.quantity)} FCFA`, 188, y + 5, { align: 'right' });
+
+                y += rowH;
+                pdf.line(12, y, 198, y);
+            });
+
+            y += 12;
+
+            // Totals
+            pdf.setDrawColor(...accentBlue);
+            pdf.setLineWidth(0.6);
+            pdf.roundedRect(110, y, 88, devi.montantTVA > 0 ? 28 : 20, 4, 4, 'D');
+
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(11);
+            pdf.text("Sous-total", 140, y + 8, { align: 'right' });
+            pdf.text(`${formatNumber(devi.totalHT)} FCFA`, 188, y + 8, { align: 'right' });
+
+            let ty = y + 15;
+            if (devi.montantTVA > 0) {
+                pdf.text(`TVA ${devi.tvaRate}%`, 140, ty, { align: 'right' });
+                pdf.text(`${formatNumber(devi.montantTVA)} FCFA`, 188, ty, { align: 'right' });
+                ty += 7;
+            }
+
+            pdf.setFontSize(12);
+            pdf.text("TOTAL TTC", 140, ty, { align: 'right' });
+            pdf.setTextColor(...accentBlue);
+            pdf.text(`${formatNumber(devi.totalTTC)} FCFA`, 188, ty, { align: 'right' });
+
+            y = ty + 18;
+
+            // Amount in words
+            pdf.setFont('helvetica', 'italic');
+            pdf.setFontSize(10);
+            pdf.setTextColor(...textColor);
+            const words = numberToLetters(Math.round(devi.totalTTC));
+            const lines = pdf.splitTextToSize(`Arrêté à la somme de : ${words}`, 180);
+            pdf.text(lines, 12, y + 5);
+
+            y += lines.length * 6 + 18;
+
+            // Signature
+            try {
+                const sigUrl = "https://i.postimg.cc/CL7k2WVW/Design-sans-titre-(3).png";
+                pdf.addImage(sigUrl, "PNG", 130, y, 65, 28);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setFontSize(9);
+                pdf.text("Signature", 162, y + 34, { align: 'center' });
+            } catch(e) {
+                pdf.setFontSize(11);
+                pdf.text("Signature", 160, y + 10, { align: 'center' });
+            }
+
+            // Footer
+            const pageH = pdf.internal.pageSize.getHeight();
+            pdf.setFontSize(8);
+            pdf.setTextColor(0, 0, 0);
+            pdf.text("RC-SN-DKR-2024-A-46119", 105, pageH - 22, { align: 'center' });
+            pdf.text("Tél : +221 77 480 09 30 - 78 896 19 48   |   Email : senegalluxuariecars@yahoo.com", 105, pageH - 16, { align: 'center' });
+            pdf.text("NINEA:0116573661", 105, pageH - 10, { align: 'center' });
+
+            pdf.save(`Devis-${devi.devisNumber}.pdf`);
+            
+            // Générer un nouveau numéro après création du PDF
+            generateAndIncrementDevisNumber();
+        }
+
+        // Number to letters function
+        function numberToLetters(num) {
+            num = Math.round(num);
+            const units = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+            const teens = ['dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf'];
+            const tens = ['', 'dix', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante-dix', 'quatre-vingt', 'quatre-vingt-dix'];
+            
+            if (num === 0) return 'zéro francs CFA';
+            let result = '';
+            
+            function convertLessThanThousand(n) {
+                let str = '';
+                if (n >= 100) {
+                    const hundreds = Math.floor(n / 100);
+                    if (hundreds === 1) {
+                        str += 'cent';
+                    } else {
+                        str += units[hundreds] + ' cent';
+                    }
+                    n %= 100;
+                    if (n > 0) str += ' ';
+                }
+                if (n === 80) return str + 'quatre-vingts';
+                if (n >= 20) {
+                    const tensDigit = Math.floor(n / 10);
+                    const unitsDigit = n % 10;
+                    if (tensDigit === 7 || tensDigit === 9) {
+                        const base = tensDigit === 7 ? 60 : 80;
+                        const remainder = n - base;
+                        str += (tensDigit === 7 ? 'soixante' : 'quatre-vingt');
+                        if (remainder > 0) {
+                            if (remainder === 1) str += '-et-un';
+                            else if (remainder === 11) str += '-onze';
+                            else if (remainder < 10) str += '-' + units[remainder];
+                            else str += '-' + teens[remainder - 10];
+                        } else if (tensDigit === 8) str += 's';
+                    } else {
+                        str += tens[tensDigit];
+                        if (unitsDigit > 0) {
+                            if (unitsDigit === 1 && tensDigit !== 8) str += '-et-un';
+                            else str += '-' + units[unitsDigit];
+                        } else if (tensDigit === 8) str += 's';
+                    }
+                } else if (n >= 10) {
+                    str += teens[n - 10];
+                } else if (n > 0) {
+                    str += units[n];
+                }
+                return str.trim();
+            }
+            
+            if (num >= 1000000) {
+                const millions = Math.floor(num / 1000000);
+                result += convertLessThanThousand(millions) + (millions > 1 ? ' millions ' : ' million ');
+                num %= 1000000;
+            }
+            if (num >= 1000) {
+                const thousands = Math.floor(num / 1000);
+                if (thousands === 1) result += 'mille ';
+                else result += convertLessThanThousand(thousands) + ' mille ';
+                num %= 1000;
+            }
+            if (num > 0) {
+                if (result !== '') result += ' ';
+                result += convertLessThanThousand(num);
+            }
+            return result.trim() + ' francs CFA';
+        }
+
+        // Event Listeners for real-time calculations
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('quantity') || e.target.classList.contains('price')) {
+                updateDevisTotals();
+            }
+        });
+    </script>
 </body>
 </html>
-
- 
