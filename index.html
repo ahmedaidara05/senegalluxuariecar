@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interface Futuriste</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Logo futuriste */
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+            margin-bottom: 60px;
+            position: relative;
+        }
+        
+        .logo {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .logo-core {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(45deg, #00f3ff, #0080ff);
+            border-radius: 50%;
+            position: relative;
+            animation: pulse 4s infinite ease-in-out;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .logo-core::before {
+            content: '';
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            border: 2px solid rgba(0, 243, 255, 0.3);
+            border-radius: 50%;
+            animation: rotate 20s linear infinite;
+        }
+        
+        .logo-core::after {
+            content: '';
+            position: absolute;
+            width: 160px;
+            height: 160px;
+            border: 1px solid rgba(0, 128, 255, 0.2);
+            border-radius: 50%;
+            animation: rotateReverse 15s linear infinite;
+        }
+        
+        .logo-text {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: #00f3ff;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.7);
+            z-index: 10;
+        }
+        
+        /* Conteneur des boutons */
+        .buttons-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 40px;
+            margin-top: 40px;
+            padding: 20px;
+        }
+        
+        /* Boutons futuristes */
+        .btn {
+            position: relative;
+            width: 280px;
+            height: 120px;
+            perspective: 1000px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .btn-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            border-radius: 12px;
+        }
+        
+        .btn:hover .btn-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .btn-front, .btn-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-front {
+            background: linear-gradient(135deg, rgba(20, 30, 48, 0.9), rgba(36, 59, 85, 0.9));
+            border: 1px solid rgba(0, 243, 255, 0.2);
+        }
+        
+        .btn-back {
+            background: linear-gradient(135deg, rgba(0, 128, 255, 0.9), rgba(0, 243, 255, 0.9));
+            color: #0a0a1a;
+            transform: rotateY(180deg);
+            font-weight: bold;
+        }
+        
+        .btn-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            color: #00f3ff;
+        }
+        
+        .btn-title {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        
+        .btn-subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+            text-align: center;
+            margin-top: 5px;
+        }
+        
+        .btn-back .btn-title {
+            color: #0a0a1a;
+        }
+        
+        /* Effets lumineux */
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00f3ff, #0080ff, #00f3ff);
+            border-radius: 14px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .btn:hover::before {
+            opacity: 1;
+            animation: borderGlow 2s linear infinite;
+        }
+        
+        /* Effets de fond futuriste */
+        .bg-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: rgba(0, 243, 255, 0.5);
+            border-radius: 50%;
+        }
+        
+        .grid-line {
+            position: absolute;
+            border: 1px solid rgba(0, 243, 255, 0.05);
+        }
+        
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(0, 243, 255, 0.5); }
+            50% { transform: scale(1.05); box-shadow: 0 0 50px rgba(0, 243, 255, 0.8); }
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes rotateReverse {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-360deg); }
+        }
+        
+        @keyframes borderGlow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+            .buttons-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 320px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .logo-core {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .logo-core::before {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .logo-core::after {
+                width: 140px;
+                height: 140px;
+            }
+            
+            .logo-text {
+                font-size: 18px;
+                letter-spacing: 3px;
+            }
+            
+            .btn {
+                width: 280px;
+                height: 110px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-effects" id="bgEffects"></div>
+    
+    <div class="container">
+        <!-- Logo futuriste -->
+        <div class="logo-container">
+            <div class="logo">
+                <div class="logo-core">
+                    <div class="logo-text">NEXUS</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Boutons de navigation -->
+        <div class="buttons-container">
+            <!-- Bouton Facture -->
+            <a href="facture.html" class="btn">
+                <div class="btn-inner">
+                    <div class="btn-front">
+                        <div class="btn-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                        <div class="btn-title">FACTURE</div>
+                        <div class="btn-subtitle">Gestion des factures</div>
+                    </div>
+                    <div class="btn-back">
+                        <div class="btn-title">ACCÉDER AUX FACTURES</div>
+                        <div class="btn-subtitle">Cliquez pour ouvrir</div>
+                    </div>
+                </div>
+            </a>
+            
+            <!-- Bouton Bon -->
+            <a href="bon.html" class="btn">
+                <div class="btn-inner">
+                    <div class="btn-front">
+                        <div class="btn-icon"><i class="fas fa-ticket-alt"></i></div>
+                        <div class="btn-title">BON</div>
+                        <div class="btn-subtitle">Gestion des bons</div>
+                    </div>
+                    <div class="btn-back">
+                        <div class="btn-title">ACCÉDER AUX BONS</div>
+                        <div class="btn-subtitle">Cliquez pour ouvrir</div>
+                    </div>
+                </div>
+            </a>
+            
+            <!-- Bouton Devis -->
+            <a href="devis.html" class="btn">
+                <div class="btn-inner">
+                    <div class="btn-front">
+                        <div class="btn-icon"><i class="fas fa-clipboard-list"></i></div>
+                        <div class="btn-title">DEVIS</div>
+                        <div class="btn-subtitle">Gestion des devis</div>
+                    </div>
+                    <div class="btn-back">
+                        <div class="btn-title">ACCÉDER AUX DEVIS</div>
+                        <div class="btn-subtitle">Cliquez pour ouvrir</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Créer des particules pour l'effet futuriste
+        function createParticles() {
+            const container = document.getElementById('bgEffects');
+            
+            // Créer des particules
+            for (let i = 0; i < 80; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Position aléatoire
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.top = Math.random() * 100 + 'vh';
+                
+                // Animation de déplacement
+                const duration = 20 + Math.random() * 20;
+                const delay = Math.random() * 5;
+                
+                particle.style.animation = `moveParticle ${duration}s linear ${delay}s infinite`;
+                
+                // Taille aléatoire
+                const size = 1 + Math.random() * 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                
+                container.appendChild(particle);
+            }
+            
+            // Créer des lignes de grille
+            for (let i = 0; i < 20; i++) {
+                const line = document.createElement('div');
+                line.classList.add('grid-line');
+                
+                // Lignes verticales
+                if (i < 10) {
+                    line.style.left = (i * 10) + 'vw';
+                    line.style.top = '0';
+                    line.style.width = '1px';
+                    line.style.height = '100vh';
+                } 
+                // Lignes horizontales
+                else {
+                    line.style.left = '0';
+                    line.style.top = ((i-10) * 10) + 'vh';
+                    line.style.width = '100vw';
+                    line.style.height = '1px';
+                }
+                
+                container.appendChild(line);
+            }
+        }
+        
+        // Ajouter l'animation des particules
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes moveParticle {
+                0% {
+                    transform: translateY(0) translateX(0);
+                    opacity: 0;
+                }
+                10% {
+                    opacity: 1;
+                }
+                90% {
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(-100vh) translateX(20px);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Initialiser les effets
+        document.addEventListener('DOMContentLoaded', createParticles);
+        
+        // Effet sonore au survol des boutons (optionnel)
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(button => {
+            button.addEventListener('mouseenter', () => {
+                // Pour un effet sonore, vous pourriez ajouter un son ici
+                // const hoverSound = new Audio('hover-sound.mp3');
+                // hoverSound.volume = 0.2;
+                // hoverSound.play();
+            });
+        });
+    </script>
+</body>
+</html>
