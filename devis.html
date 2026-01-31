@@ -289,7 +289,7 @@
   </div>
   <div style="min-width:200px">
     <label>Numéro Devis</label>
-    <div class="devis-number-display" id="numDevisDisplay">Chargement...</div>
+    <div class="devis-number-display" id="numDevisDisplay">DEV-2000-01</div>
   </div>
   <div style="min-width:200px">
     <label>Date du devis</label>
@@ -554,8 +554,8 @@ function generateNewDevisNumber() {
       doc.setFontSize(14); doc.setFont('helvetica','bold'); 
       doc.text(' ', pageWidth - rightMargin - 10, 140, {align:'right'});
       doc.setFontSize(10); doc.setFont('helvetica','normal');
-      doc.text('Tel: +221 70 878 19 89 / 77 470 47 42', pageWidth - rightMargin - 10, 154, {align:'right'});
-      doc.text('Email: etsiniasseetfreres@yahoo.com', pageWidth - rightMargin - 10, 168, {align:'right'});
+      doc.text(' ', pageWidth - rightMargin - 10, 154, {align:'right'});
+      doc.text(' ', pageWidth - rightMargin - 10, 168, {align:'right'});
       doc.text(' ', pageWidth - rightMargin - 10, 182, {align:'right'});
       
       // Date en haut à gauche
@@ -620,7 +620,7 @@ function generateNewDevisNumber() {
       doc.text('Arrêté le présent devis à la somme de ' + enLettre + ' FRANCS CFA.', leftMargin, finalY + 70);
 
       // Infos entreprise en bas centré
-      const footerText = "Tel: +221 70 878 19 89/77 470 47 42/Email: etsiniasseetfreres@yahoo.com/CPTE: CORISBANK SN213 01018 005058724101 42/NINEA: 004119964/RCCM: SN THS 2009.A.2320";
+      const footerText = "RC-SN-DKR-2024-A-46119 Tél : +221 77 480 09 30 - 78 896 19 48 Email : senegalluxuariecars@yahoo.com NINEA:0116573661";
       doc.setFontSize(7);
       doc.setFont('helvetica', 'italic');
       doc.text(footerText, pageWidth / 2, doc.internal.pageSize.getHeight() - 30, { align: 'center' });
