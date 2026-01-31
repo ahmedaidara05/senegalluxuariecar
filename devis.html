@@ -272,7 +272,7 @@
           <h1 style="margin:0;font-size:20px">DEVIS</h1>
          </div>
         <div class="logo" title="Logo">
-          <img src="https://i.postimg.cc/wxRckfnt/3.png" alt="logo">
+          <img src="https://i.postimg.cc/gks2dpjN/photo-6046262394910084604-y.jpg" alt="logo">
         </div>
       </div>
     </header>
@@ -546,7 +546,7 @@ function generateNewDevisNumber() {
       const leftMargin = 40; const rightMargin = 40; const pageWidth = doc.internal.pageSize.getWidth();
 
       // Header: logo at top-right (square)
-      const img = new Image(); img.crossOrigin = 'anonymous'; img.src = 'https://i.postimg.cc/85RsLkrb/LOGO.png';
+      const img = new Image(); img.crossOrigin = 'anonymous'; img.src = 'https://i.postimg.cc/gks2dpjN/photo-6046262394910084604-y.jpg';
       await new Promise(res=>{ img.onload = res; img.onerror = res; });
       const logoSize = 130; doc.addImage(img, 'JPEG', pageWidth - rightMargin - logoSize, 40, logoSize, logoSize);
 
@@ -728,7 +728,4 @@ document.getElementById('generatePdf').addEventListener('click', async ()=>{
 </body>
 </html>
 
-
-
-
-
+ 
