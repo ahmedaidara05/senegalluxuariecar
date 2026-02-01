@@ -1317,16 +1317,24 @@
             y += lines.length * 6 + 18;
 
             // Signature
-            try {
-                const sigUrl = "https://i.postimg.cc/CL7k2WVW/Design-sans-titre-(3).png";
-                pdf.addImage(sigUrl, "PNG", 130, y, 65, 28);
-                pdf.setFont('helvetica', 'normal');
-                pdf.setFontSize(9);
-                pdf.text("Signature", 162, y + 34, { align: 'center' });
-            } catch(e) {
-                pdf.setFontSize(11);
-                pdf.text("Signature", 160, y + 10, { align: 'center' });
-            }
+// Signature - Position ajustée (plus à droite et plus haute)
+try {
+    const sigUrl = "https://i.postimg.cc/cH4CMSRy/ramadan-2-0-(1).png";
+
+    const size = 40; // taille du carré
+    const xPosition = 150; // Position X pour être plus à droite
+    const yPosition = y - 10; // RÉDUIT de 15mm pour SOULEVER la signature
+
+    pdf.addImage(sigUrl, "PNG", 155, y - 15, size, size);
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    pdf.text("Signature", 155 + size / 2, (y - 15) + size + 6, { align: 'center' });
+
+} catch(e) {
+    pdf.setFontSize(11);
+    pdf.text("Signature", 175, y - 5, { align: 'center' }); // Ajusté aussi pour l'erreur
+}
 
             // Footer
             const pageH = pdf.internal.pageSize.getHeight();
