@@ -1074,19 +1074,36 @@
             
             // Garagiste à droite
             doc.setFontSize(12);
-            doc.text('Le Garagiste', pageWidth - rightMargin - 50, signatureY, {align: 'right'});
+            doc.text(' ', pageWidth - rightMargin - 50, signatureY, {align: 'right'});
             doc.setFontSize(10);
             doc.text('', pageWidth - rightMargin - 50, signatureY + 40, {align: 'right'});
             
             // Tampon sous le garagiste
-            const tamponImg = new Image();
-            tamponImg.crossOrigin = 'anonymous';
-            tamponImg.src = 'https://i.postimg.cc/CL7k2WVW/Design-sans-titre-(3).png';
+          // Tampon sous le garagiste
+// Tampon - DÉPLACÉ VERS LA DROITE
+const tamponImg = new Image();
+tamponImg.crossOrigin = 'anonymous';
+tamponImg.src = 'https://i.postimg.cc/cH4CMSRy/ramadan-2-0-(1).png';
 
-            await new Promise(resolve => {
-                tamponImg.onload = resolve;
-                tamponImg.onerror = resolve;
-            });
+await new Promise(resolve => {
+    tamponImg.onload = resolve;
+    tamponImg.onerror = resolve;
+});
+
+// Ajouter le tampon
+try {
+    // Position X augmentée POUR DÉPLACER À DROITE
+    const tamponX = 160; // CHANGÉ de 80 à 160 (beaucoup plus à droite)
+    const tamponY = 120; // CHANGÉ de 140 à 120 (plus haut)
+   // Encore plus petit
+const tamponWidth = 20; // Extrêmement petit
+const tamponHeight = 20;
+    
+    // UTILISEZ LES VARIABLES ICI !
+    pdf.addImage(tamponImg, 'PNG', tamponX, tamponY, tamponWidth, tamponHeight);
+} catch(e) {
+    console.log("Tampon non chargé");
+}
 
             // On choisit juste la largeur qu'on veut
             const newWidth = 170;
