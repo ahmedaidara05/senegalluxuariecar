@@ -1,0 +1,26 @@
+
+{
+  "name": "senegalluxuariecar",
+  "short_name": "senegalluxuariecar",
+  "description": "senegalluxuariecar",
+ "start_url": "/senegalluxuariecar/",   
+  "scope": "/senegalluxuariecar/", 
+  "display": "standalone",
+  "background_color": "#3B82F6",
+  "theme_color": "#3B82F6",
+  "icons": [
+    {
+      "src": "https://i.postimg.cc/GttpzjKy/photo-5877530408503676332-y.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.postimg.cc/GttpzjKy/photo-5877530408503676332-y.jpg
+",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
